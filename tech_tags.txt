@@ -1,0 +1,462 @@
+.NET
+.NET Core
+.NET Framework
+AEO
+AI
+AI Agents
+AL
+AML
+AOSP
+API
+API (REST
+APM
+ASP.NET
+ASP.NET Core
+ASP.NET MVC
+AWS
+AWS ECS
+AWS S3
+Active Directory
+ActiveJob
+ActiveMQ
+Airflow
+Amplitude
+Android
+Android Studio
+Angular
+Angular.js
+AngularJS
+Ansible
+Apache
+Apache Airflow
+Apache JackRabbit
+Apache Spark
+Apache Tomcat
+App Service
+AppDynamics
+Athena
+Aure Key Vault
+Automated testing
+Avaya
+Azure
+Azure Cloud
+Azure DevOps
+Azure Event Hub
+Azure Functions
+Azure Repos
+Azure SQL
+BPMN
+Backend
+Basch
+Bash
+Bash scripting
+Bicep
+Bitbucket
+Blazor
+Boot
+Bootstrap
+Business analysis
+C
+C#
+C++
+C/AL
+C/C++
+CDI
+CI/CD
+CI/CD Pipelines
+CSS
+CSS3
+Capybara
+Cassandra
+ChatGPT
+Cisco
+Cloud
+Cloud development
+Cloud platform
+Cloudera
+Cloudflare
+Communication skills
+Computer vision
+Confluence
+Continuous integration
+Core Web Vitals
+CosmosDB
+Cucumber
+Cybersecurity
+Cypress
+DAX
+DBT
+DRF
+Dagster
+Dart
+Data
+Data Integration
+Data Science
+Data structures
+Data visualization
+Databricks
+Datadog
+Degree
+Delphi
+Design process
+DevExpress
+DevOps
+Django
+Docker
+Domain-driven design
+Draw.io
+Drupal
+Dynatrace
+ECS
+EF Core
+EJB
+ELK
+ERP
+ESB
+Elasticsearch
+Energy Logserver
+Engineering
+Enterprise Architect
+Entity Framework
+Entity Framework Core
+EntraID
+Excel
+FastAPI
+Figma
+Firebase
+Firewall
+Flask
+Flutter
+Flutter SDK
+FortiSIEM
+Frontend
+Fullstack
+Functions
+GA4
+GCP
+GIT
+GenAI
+GenerativeAI
+Genesys Cloud
+Gerrit
+Git
+GitHub
+GitHub Actions
+GitLab
+GitLab CI
+GitLabYoutrack
+GlassFish
+Go
+Golang
+Google Ad Manager
+Google Cloud
+Google Cloud Platform
+Gradle
+Grafana
+GraphQL
+Groovy
+HTML
+HTML5
+HTTP
+Hadoop
+Hazelcast
+Heap
+Helm
+Hibernate
+Hive
+Hotwire
+Hudi
+Hyper-V
+IBM Work Scheduler (IWS)
+Iceberg
+InfluxDB
+Integration test
+IoT
+JAX-RS
+JBehave
+JBoss
+JCL
+JDBC
+JIRA
+JMeter
+JPA/Hibernate
+JSON
+JUnit
+Jakarta EE
+Java
+Java EE
+JavaScript
+JavaScript/TypeScript
+Jenkins
+Jest
+Jira
+Joget
+KYC
+Kafka
+Kibana
+Kinesis
+Kotlin
+Kubernetes
+LAN/WAN
+LLM
+Lambda
+LangChain
+Laravel
+Lighthouse
+Linux
+Liquibase
+Logstash
+MAUI
+MCP
+ML
+MLOps
+MS Dynamics AX
+MS Office
+MS Orleans
+MS SQL
+MS SQL Server
+MSSQL
+MVC
+MVVM
+Machine Learning
+Mainframe
+MariaDB
+Maven
+Mendix
+Meteor.js
+Microservice architecture
+Microservices
+Microservices architecture
+Microsoft Azure
+Microsoft Dynamics 365
+Microsoft Excel
+Microsoft Power BI
+Microsoft Project
+Microsoft SQL Server
+Miro
+Mistral
+Mixpanel
+MobX
+MochaJS
+Mockito
+MongoDB
+MySQL
+NHibernate
+NServiceBus
+NUnit
+Nest.js
+NestJS
+New Relic
+Next.js
+NgRx
+Nginx
+NiFi
+Niemiecki (B2)
+NoSQL
+Node.js
+Npm
+OData
+OOP
+ORM
+OWASP
+Object 
+Oriented Programming
+Office 365
+OpenAI
+OpenAI API
+OpenAPI
+OpenSearch
+OpenShift
+OpenStack
+OpenTelemetry
+Oracle
+Oracle APEX
+Oracle Apex
+Oracle DB
+PDFLib
+PHP
+PL/SQL
+Packer
+Pandas
+Pendo
+Percona
+PingID
+Pivot Tables
+Playwright
+Polski
+Polski (B2)
+Polski (Biegły)
+Polski (C1)
+PostgreSQL
+PostgreSQL i MariaDB
+Postman
+Power Apps
+Power Automate
+Power BI
+Power Platform
+Power Query
+PowerPoint
+PowerShell
+PrestaShop
+PrimeFaces
+Prometheus
+Protocols
+Prototyping
+Provider
+Pulumi
+PyTorch
+Python
+Pytorch
+QMetry
+QRadar
+RAG
+REST
+REST API
+REST APIs
+REST Api
+RESTful
+RSpec
+RabbitMQ
+Razor
+React
+React Native
+React.js
+Red Hat
+Redis
+Redux
+Redux Toolkit
+Relational database
+Repository
+Responsive Web Design
+Responsive web design
+RestAssured
+Riverpod
+Riverpod / Bloc / MobX / Provider (zarządzanie stanem)
+Ruby
+Ruby on Rails
+Rwd
+RxJS
+S3
+SAP
+SAP HANA
+SAS
+SCSS
+SEO
+SFTP
+SNS
+SOA
+SOAP
+SOAP API
+SQL
+SQL Server
+SQS
+SRE
+SSR
+Salesforce
+Scala
+Security
+Selenium
+Selenium WebDriver
+Semantic Kernel
+Sentry
+Service Bus
+Service-oriented architecture
+ServiceNow
+SharePoint
+Shell
+Sidekiq
+SignalR
+Snowflake Data Cloud
+Software 
+testing
+SonarQube
+Spark
+Splunk
+Spring
+Spring Boot
+Spring Data
+Spring Framework
+Stimulus
+Storage
+Swagger
+SystemVerilog
+T-SQL
+TCP
+TDD
+TSQL
+Tableau
+Tailwind
+Tailwind CSS
+Team management
+Teams
+TensorFlow
+Tensorflow
+Terradata
+Terraform
+TestRail
+Testing
+Tomcat
+Tosca
+Trino
+Twig
+TypeORM
+TypeScript
+Typescript
+UDP
+UI
+UML
+UX
+UX design
+Ubuntu
+UiPath
+Ukraiński
+Unit testing
+Unix
+VMware
+VPN
+Video processing
+Virtualization
+Visual Studio
+Visual Studio Code
+Vite
+Vue.js
+WCAG
+WCAG 2.1
+WPF
+Wazuh
+Web API
+Web Services
+Web applications
+Web development
+Web server
+WebAPI
+WebDriver
+WebPageTest
+WebSock
+WebSocket
+WebSocket)
+WebdriverIO
+Webflux
+Webpack
+Websockets / Socket.io
+WinForms
+Windows
+Windows Server
+Winforms
+WordPress
+WordPress VIP
+XML
+XSD
+XSLT
+XUnit
+Xephyr
+Zabbix
+Zend
+cloud design patterns
+google maps api
+iOS
+jQuery
+macOS
+web performance
+xUnit
+z/OS

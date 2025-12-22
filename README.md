@@ -26,7 +26,7 @@ The following fields are stored in the database for each job listing:
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
-| `category` | VARCHAR | |
+| `category` | VARCHAR | 'Data', 'Mobile', 'QA', 'Security', 'UX/UI', 'Ruby', 'Manager', 'DevOps', 'Backend', 'Frontend', 'Fullstack', 'AI', 'Support' |
 | `tech_stack` | TEXT | |
 | `comment` | TEXT | |
 | `status` | VARCHAR | 'sent', 'got response', 'not interested', 'meeting set', 'offer', 'rejected', 'other'|
@@ -37,8 +37,11 @@ The following fields are stored in the database for each job listing:
 | `location` | VARCHAR | |
 | `location_type` | VARCHAR | 'remote', 'office', 'hybrid' |
 | `salary` | TEXT | |
-| `salary_type` | VARCHAR | 'hourly-b2b', 'hourly-uop', 'monthly-b2b', 'monthly-uop', 'yearly-b2b', 'yearly-uop' |
+|`salary_min_normalized`| Number| |
+|`salary_max_normalized`| Number| |
+| `salary_type` | VARCHAR | 'UOP', 'B2B H', 'B2B M', 'Substitution', 'Dzieło', 'Zlecenie' |
 | `years_of_experience` | TEXT | |
+|`years_of_experience_normalized`| Number| |
 | `company` | VARCHAR | |
 | `company_link` | VARCHAR | |
 | `company_description` | TEXT | |
@@ -51,31 +54,43 @@ The following fields are stored in the database for each job listing:
 
 ## Scripts Usage
 
-### 1. Initialize Database
+### 1. Data Collection
+   Once everything works paste links to `links/new.txt` and run
+   ```bash
+   python process_new.py
+   ```
+   That will perform following steps:
+   - initialize database
+   - clean links
+   - add to queue
+   - scrape jobs
+   - save to database
+
+#### 1.1 Initialize Database
 Sets up the PostgreSQL database and `job_offers` table.
 ```bash
 python init_db.py
 ```
 
-### 2. Clean Links
+#### 1.2 Clean Links
 Removes duplicates and cleans URL parameters from a list of links.
 ```bash
 python links-cleener.py input_file.txt [output_file.txt]
 ```
 
-### 3. Scrape a Single Job
+#### 1.3 Scrape a Single Job
 Scrapes a job page and prints the data to the console (JSON format).
 ```bash
 python scrape_job.py <url>
 ```
 
-### 4. Save Job to Database
+#### 1.4 Save Job to Database
 Scrapes a job page and saves it to the `job_offers` table.
 ```bash
 python save_to_db.py <url>
 ```
 
-### 5. Reporting
+### 2. Reporting
 Prints the titles of all jobs currently in the database.
 ```bash
 python reporting.py
@@ -105,9 +120,8 @@ python reporting.py
 **Planned modules:**
 - if link is to the same page with just different parameter, append it
 - add subcategories
+- add normalization for salary
+- add normalization for years of experience
 - learning how to use rabbitmq
 - Asynchronous queue and scraper
 - Reporting and analytics (graphs, word clouds, salary stats)
-
-
-# Full-Stack - Java, Full-Stack - .Net, Full-Stack - Node.js, Full-stack - Python, Data, Manager/PM,
