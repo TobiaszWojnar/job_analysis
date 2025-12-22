@@ -8,8 +8,8 @@ def print_all_titles():
         print(row[0])
 
 
-def print_all_tech():
-    rows = set(get_columns(['tech_stack']))
+def print_tech(category: str = ''):
+    rows = set(get_columns(['tech_stack','category'], where_clause=f"category LIKE '{category}'"))
     tech_tags = []
     for row in rows:
         tech_tags +=row[0].split(',')
@@ -24,4 +24,4 @@ def get_stats():
     print( filtered[filtered["category"]=='Fullstack'].sort_values(by='years_of_experience'))
 
 if __name__ == "__main__":
-    print_all_tech()
+    print_tech('Backend')
