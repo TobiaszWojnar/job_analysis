@@ -4,15 +4,15 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import cloudscraper
 
-# from src.scraping.strategies.base_strategy import BaseJobStrategy
-# from src.scraping.strategies.pracuj_strategy import PracujStrategy
-# from src.scraping.strategies.nofluff_strategy import NoFluffStrategy
-# from src.scraping.strategies.protocol_strategy import ProtocolStrategy
+from src.scraping.strategies.base_strategy import BaseJobStrategy
+from src.scraping.strategies.pracuj_strategy import PracujStrategy
+from src.scraping.strategies.nofluff_strategy import NoFluffStrategy
+from src.scraping.strategies.protocol_strategy import ProtocolStrategy
 
-from strategies.base_strategy import BaseJobStrategy
-from strategies.pracuj_strategy import PracujStrategy
-from strategies.nofluff_strategy import NoFluffStrategy
-from strategies.protocol_strategy import ProtocolStrategy
+# from strategies.base_strategy import BaseJobStrategy
+# from strategies.pracuj_strategy import PracujStrategy
+# from strategies.nofluff_strategy import NoFluffStrategy
+# from strategies.protocol_strategy import ProtocolStrategy
 
 
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     #     sys.exit(1)
     # url = sys.argv[1]
 
-    url = "https://www.pracuj.pl/praca/software-engineer-krakow,oferta,1004480187"
+    url = "https://www.pracuj.pl/praca/analityk-biznesowy-katowice,oferta,1004548049"
 
     try:
         result = scrape_job_page(url)

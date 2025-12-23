@@ -1,11 +1,14 @@
 from bs4 import BeautifulSoup
 import re
 from .base_strategy import BaseJobStrategy
-from .strategy_helper import get_category_helper, get_salary_type_helper, get_text_helper, get_salary_helper
+from .strategy_helper import get_category_helper, get_salary_type_helper, get_text_helper, get_salary_helper, get_years_of_experience_helper
 
 class PracujStrategy(BaseJobStrategy):
     def get_title(self, soup: BeautifulSoup) -> str:
-        return get_text_helper(soup.find('h1', attrs={'data-test': 'text-positionName'}))
+        title = get_text_helper(soup.find('h1', attrs={'data-test': 'text-positionName'}))
+        if title:
+            return title
+        return ''
 
     def get_company(self, soup: BeautifulSoup) -> str:
         return get_text_helper(soup.find('h2', attrs={'data-test':'text-employerName'}), ['O firmie'])
@@ -20,13 +23,21 @@ class PracujStrategy(BaseJobStrategy):
         about_us = soup.find(attrs={'data-scroll-id': 'about-us-description-1'})
         if about_us is None:
             return ''
-        return about_us.li.get_text(strip=True, separator=' ')
+        about_us = about_us.find_all('li')
+        return ', '.join(get_text_helper(about) for about in about_us)
 
     def get_category(self, soup: BeautifulSoup) -> str:
-        category = get_category_helper(self.get_title(soup), self.get_tech_stack(soup))
+        tech_stack = self.get_tech_stack(soup)
+        it_specializations = get_text_helper(soup.find(attrs={'data-test': 'it-specializations'}))
+
+        category = get_category_helper(self.get_title(soup), tech_stack)
+
         if category:
             return category
-        return get_category_helper(soup.find(attrs={'data-test': 'it-specializations'}), self.get_tech_stack(soup))
+
+        if it_specializations:
+            return get_category_helper(it_specializations, tech_stack)
+        return ''
 
     def get_tech_stack(self, soup: BeautifulSoup) -> str:
         expected_section = soup.find(attrs={'data-test': 'section-technologies-expected'})

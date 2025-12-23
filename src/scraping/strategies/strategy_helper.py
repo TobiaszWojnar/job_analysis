@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
+import re
 
 def get_category_helper(title: str, tech_stack: str) -> str:
+    if not title:
+        title = ''
     title = title.lower()
     tech_stack = tech_stack.lower()
 
@@ -24,9 +27,9 @@ def get_category_helper(title: str, tech_stack: str) -> str:
         return 'Backend'
     if 'frontend' in title or 'front-end' in title:  # In what ??
         return 'Frontend'
-    if 'fullstack' in title or 'full-stack' in title:  # In what ??
+    if 'fullstack' in title or 'full-stack' in title or 'full stack' in title:  # In what ??
         return 'Fullstack'
-    if 'AI' in title:
+    if 'ai' in title:
         return 'AI'
     if 'support' in title or 'wsparc' in title or 'konsult' in title:
         return 'Support'
@@ -41,7 +44,6 @@ def get_salary_type_helper(salary_section: BeautifulSoup) -> str:
 
     found_types = []
     if 'b2b' in salary_text:
-        found_types.append('B2B')
         if 'godz. | kontrakt b2b' in salary_text or 'godz. kontrakt b2b' in salary_text or 'hr. | b2b' in salary_text or 'hr. b2b' in salary_text:
             found_types.append('B2B H')
         elif 'mies. | kontrakt b2b' in salary_text or 'mth. | b2b' in salary_text or 'b2b) miesięcznie' in salary_text or 'mth. b2b' in salary_text:
@@ -75,9 +77,20 @@ def get_years_of_experience_helper(node: BeautifulSoup) -> str:
     matches_en = re.findall(r'(?:\+|\()?\s*(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?)\s*\+?\s+year', text)
     return ", ".join(matches_pl + matches_en)
 
-def get_salary_helper(node: BeautifulSoup) -> str: # TODO: triple check if works
-    salary_text = get_text_helper(node).upper().replace('ZŁ', 'PLN')
-    salary_ranges = re.findall(r'((( ?\d)+([,]\d+)?) ?- ?)?(( ?\d)+([,]\d+)?)[ ]?(PLN)?', salary_text)
+def remove_spaces_in_numbers(text: str) -> str:
+    return re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', text)
 
-    remove_after_comma = ", ".join(salary_ranges).replace(',00', '')
-    return re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', remove_after_comma)
+def get_salary_helper(salary_section: BeautifulSoup) -> str: # TODO: triple check if works
+    salary_text = get_text_helper(salary_section).upper()
+    salary_text = salary_text.replace('B2B', '')
+    salary_text = salary_text.replace('ZŁ', 'PLN') # .replace(' PLN', 'PLN')
+    salary_text = salary_text.replace(',00', '').replace('  ', ' ').replace(' - ', '-')
+    salary_text = remove_spaces_in_numbers(salary_text)
+    salary_ranges = re.findall(r'(\d+-)?(\d+)( PLN)?', salary_text)
+
+    #re.findall('(test (?:word1|word2))', 'test word1') a way to handle to get salary types
+
+    salary_ranges_arr = [''.join(j for j in sub) for sub in salary_ranges]
+
+    stringify = ", ".join(salary_ranges_arr)
+    return stringify

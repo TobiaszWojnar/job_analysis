@@ -117,11 +117,12 @@ python reporting.py
 
 
 
-**Planned modules:**
+**TODO**
+- test if surrent scraping works
 - if link is to the same page with just different parameter, append it
 - add subcategories
 - add normalization for salary
 - add normalization for years of experience
 - learning how to use rabbitmq
 - Asynchronous queue and scraper
-- Reporting and analytics (graphs, word clouds, salary stats)
+- Reporting and analytics (graphs, word clouds, salary stats, tech tags per category)
