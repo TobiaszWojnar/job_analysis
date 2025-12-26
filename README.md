@@ -118,7 +118,6 @@ python reporting.py
 
 
 **TODO**
-- test if surrent scraping works
 - if link is to the same page with just different parameter, append it
 - add subcategories
 - add normalization for salary

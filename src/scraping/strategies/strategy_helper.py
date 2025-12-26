@@ -26,15 +26,38 @@ def get_category_helper(title: str, tech_stack: str) -> str:
     if 'backend' in title or 'back-end' in title: # In what ??
         return 'Backend'
     if 'frontend' in title or 'front-end' in title:  # In what ??
-        return 'Frontend'
+        return 'Frontend - '+get_frontend_subcategory(title, tech_stack)
     if 'fullstack' in title or 'full-stack' in title or 'full stack' in title:  # In what ??
         return 'Fullstack'
     if 'ai' in title:
         return 'AI'
-    if 'support' in title or 'wsparc' in title or 'konsult' in title:
+    if 'support' in title or 'wsparc' in title or 'konsult' in title or 'sre' in title:
         return 'Support'
 
     return ''
+
+def get_frontend_subcategory(title: str, tech_stack: str) -> str:
+    title_stack = title.lower() + ' ' + tech_stack.lower()
+
+    sub_category = []
+    if 'angular' in title_stack or 'ngrx' in title_stack:
+        sub_category.append('Angular')
+    if 'react' in title_stack:
+        sub_category.append('React')
+    if 'react native' in title_stack:
+        sub_category.append('React Native')
+    if 'nestjs' in title_stack:
+        sub_category.append('NestJS')
+    if 'next' in title_stack:
+        sub_category.append('Next')
+    if 'vite' in title_stack:
+        sub_category.append('Vite')
+    if 'vue' in title_stack:
+        sub_category.append('Vue')
+    if 'php' in title_stack or 'laravel' in title_stack:
+        sub_category.append('PHP')
+
+    return ', '.join(sub_category)
 
 def get_salary_type_helper(salary_section: BeautifulSoup) -> str:
     if not salary_section:

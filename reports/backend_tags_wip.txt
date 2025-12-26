@@ -1,0 +1,96 @@
+.NET, .NET Core, .NET Framework, C#, ASP.NET Core, NHibernate, NUnit, XUnit, Entity Framework
+C++,
+Java, Gradle, Hibernate, JUnit, Maven, Mockito, Spring Boot, Spring Data, Spring Framework, 
+Groovy,
+Scala,
+Python, Django, Flask
+Go,
+PHP, 
+
+AL, C/AL, > programming language for manipulating data in a Business Central database (.NET)
+CosmosDB, 
+MongoDB, 
+MySQL, 
+NoSQL, 
+PL/SQL, 
+PostgreSQL, 
+Redis, > in-memory key–value database
+
+
+Angular,
+CSS, 
+HTML,
+JavaScript, 
+TypeScript, 
+Node.js, 
+Vue.js, 
+React, React.js, 
+
+Apache Airflow, 
+Apache JackRabbit, 
+Apache Spark, 
+Apache Tomcat, 
+Azure DevOps, 
+
+AWS, 
+
+ActiveMQ, RabbitMQ, 
+UML, BPMN, > Business Process Model and Notation
+
+
+Ansible > suite of software tools that enables infrastructure 
+
+ 
+Git, GitLab, Bitbucket, Confluence, Jira, Kubernetes, Bash, Docker, Jenkins, Swagger, Kafka,
+LangChain, > for AI
+  
+
+Delphi, 
+DevExpress,
+EF Core, 
+ELK, 
+Elasticsearch, 
+FastAPI,
+Google Cloud Platform,
+GraphQL, 
+Hadoop,
+Joget, > workflow and business process management applications
+MS Office, 
+MS Orleans, 
+MS SQL Server,  
+Microsoft Azure, 
+Microsoft Dynamics 365, 
+Microsoft Power BI, 
+Microsoft SQL Server,
+OData, 
+OpenAPI, 
+OpenSearch, 
+OpenShift, 
+OpenStack, 
+Oracle, 
+Oracle APEX, 
+Power Apps, 
+Power Automate, 
+Power Platform, 
+Power Query, 
+Prometheus, 
+SQL,
+SonarQube, 
+Spark, 
+Terraform, 
+Tomcat,
+UiPath, 
+Unix, 
+VMware, 
+WPF, 
+Webflux, 
+Windows Server, 
+Winforms
+
+API, REST API, SOAP, SOAP API,
+Data Integration, 
+Data Science, 
+Microservices, 
+Web Services, 
+LLM, MCP, OpenAI API, 
+Linux

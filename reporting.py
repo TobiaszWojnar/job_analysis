@@ -24,4 +24,7 @@ def get_stats():
     print( filtered[filtered["category"]=='Fullstack'].sort_values(by='years_of_experience'))
 
 if __name__ == "__main__":
-    print_tech('Backend')
+    rows = get_columns(["id","title", 'tech_stack'], where_clause="category LIKE 'Frontend'")
+    df = pd.DataFrame(rows, columns=["id", "title", "tech_stack"])
+    df.to_csv('report.csv', index=False)
+    print("Report saved to report.csv")

@@ -30,7 +30,7 @@ class NoFluffStrategy(BaseJobStrategy):
         category = get_category_helper(self.get_title(soup), self.get_tech_stack(soup))
         if category:
             return category
-        return get_text_helper(soup.find(attrs={'commonpostingcattech':''}), self.get_tech_stack(soup))
+        return get_category_helper(get_text_helper(soup.find(attrs={'commonpostingcattech':''})), self.get_tech_stack(soup))
 
 
     def get_tech_stack(self, soup: BeautifulSoup) -> str:
