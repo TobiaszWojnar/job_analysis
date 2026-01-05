@@ -1,12 +1,16 @@
 .NET, .NET Core, .NET Framework, C#, ASP.NET Core, NHibernate, NUnit, XUnit, Entity Framework
 C++,
 Java, Gradle, Hibernate, JUnit, Maven, Mockito, Spring Boot, Spring Data, Spring Framework, 
+Hadoop, > framework for storage and processing of large amounts of data based on Java
+Tomcat, > open-source web server and servlet container for running Java web applications
 Groovy,
 Scala,
-Python, Django, Flask
+Python, Django, Flask, FastAPI, 
 Go,
 PHP, 
+Delphi, > Pascal dilect
 
+SQL
 AL, C/AL, > programming language for manipulating data in a Business Central database (.NET)
 CosmosDB, 
 MongoDB, 
@@ -26,6 +30,15 @@ Node.js,
 Vue.js, 
 React, React.js, 
 
+
+ActiveMQ, RabbitMQ, 
+UML, BPMN, > Business Process Model and Notation
+ 
+Git, GitLab, Bitbucket, Confluence, Jira, Kubernetes, Bash, Docker, Jenkins, Swagger, Kafka, Terraform, OpenAPI,
+LangChain, > for AI
+  
+
+
 Apache Airflow, 
 Apache JackRabbit, 
 Apache Spark, 
@@ -34,26 +47,14 @@ Azure DevOps,
 
 AWS, 
 
-ActiveMQ, RabbitMQ, 
-UML, BPMN, > Business Process Model and Notation
-
-
+Elasticsearch, > source-available search engine, clients are for most languages
 Ansible > suite of software tools that enables infrastructure 
 
- 
-Git, GitLab, Bitbucket, Confluence, Jira, Kubernetes, Bash, Docker, Jenkins, Swagger, Kafka,
-LangChain, > for AI
-  
-
-Delphi, 
 DevExpress,
 EF Core, 
-ELK, 
-Elasticsearch, 
-FastAPI,
+ELK,
 Google Cloud Platform,
-GraphQL, 
-Hadoop,
+GraphQL, > data query and manipulation language, not tied to any specific database or storage engine
 Joget, > workflow and business process management applications
 MS Office, 
 MS Orleans, 
@@ -63,8 +64,7 @@ Microsoft Dynamics 365,
 Microsoft Power BI, 
 Microsoft SQL Server,
 OData, 
-OpenAPI, 
-OpenSearch, 
+OpenSearch, > open source search and analytics suite that makes it easy to ingest, search, visualize, and analyze data
 OpenShift, 
 OpenStack, 
 Oracle, 
@@ -74,15 +74,12 @@ Power Automate,
 Power Platform, 
 Power Query, 
 Prometheus, 
-SQL,
 SonarQube, 
-Spark, 
-Terraform, 
-Tomcat,
+Spark,  
 UiPath, 
 Unix, 
 VMware, 
-WPF, 
+
 Webflux, 
 Windows Server, 
 Winforms
