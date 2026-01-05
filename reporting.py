@@ -23,8 +23,15 @@ def get_stats():
     filtered = filtered[(filtered["years_of_experience"].notna()) & (filtered["salary"] != '')]
     print( filtered[filtered["category"]=='Fullstack'].sort_values(by='years_of_experience'))
 
+
+def get_last_offers(number_of_offers: int = 10):
+    rows = get_columns(["*"], limit=number_of_offers)
+    df = pd.DataFrame(rows)
+    return df
+
+
 if __name__ == "__main__":
-    rows = get_columns(["id","title", 'tech_stack'], where_clause="category LIKE 'Frontend'")
-    df = pd.DataFrame(rows, columns=["id", "title", "tech_stack"])
-    df.to_csv('report.csv', index=False)
-    print("Report saved to report.csv")
+    df = get_last_offers(8)
+    print(df)
+
+    df.to_csv('reports/last_offers.csv', index=False)

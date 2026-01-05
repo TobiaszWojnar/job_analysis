@@ -124,6 +124,7 @@ europe_currency_iso_dict = {
       "SEK": ["krona", "kr."],	
       "TRY": ["lira", "₺"],	
       "UAH": ["hryvnia", "₴"],	
+      "USD": ["dollar", "$"],
     }
 
 def replace_currency_to_iso(text: str) -> str:
