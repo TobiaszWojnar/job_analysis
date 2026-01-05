@@ -48,14 +48,19 @@ def get_similar_links(links):
     conn.close()
     return existing
 
-def get_columns(column_list: list[str], where_clause: str = ''):
+def get_columns(column_list: list[str], where_clause: str = '', limit: int = 100):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
 
     if where_clause:
         where_clause = " WHERE " + where_clause
+    
+    if limit:
+        limit_clause = " LIMIT " + str(limit)
+    else:
+        limit_clause = ""
 
-    cur.execute("SELECT " + ", ".join(column_list) + " FROM job_offers" + where_clause)
+    cur.execute("SELECT " + ", ".join(column_list) + " FROM job_offers" + where_clause + limit_clause)
     rows = cur.fetchall()
     
     cur.close()

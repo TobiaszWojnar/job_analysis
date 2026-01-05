@@ -56,12 +56,18 @@ class ProtocolStrategy(BaseJobStrategy):
         return get_years_of_experience_helper(soup)
 
     def get_responsibilities(self, soup: BeautifulSoup) -> str:
-        responsibilities = soup.find(attrs={'data-test': 'section-responsibilities'}).find_all('li')
+        responsibilities_section = soup.find(attrs={'data-test': 'section-responsibilities'})
+        responsibilities = responsibilities_section.find_all('li')
+        if responsibilities:
+            return ", ".join([get_text_helper(responsibility) for responsibility in responsibilities])
+        responsibilities = responsibilities_section.find_all('div')
         return ", ".join([get_text_helper(responsibility) for responsibility in responsibilities])
 
     def get_requirements(self, soup: BeautifulSoup) -> str:
         requirements = soup.find(attrs={'data-test': 'section-requirements'}).find_all('li')
-        return ", ".join([get_text_helper(requirement) for requirement in requirements])
+        if requirements:
+            return ", ".join([get_text_helper(requirement) for requirement in requirements])
+        return ""
 
     def get_benefits(self, soup: BeautifulSoup) -> str:
         benefits_section = soup.find(attrs={"data-test":"PROGRESS_AND_BENEFITS"})

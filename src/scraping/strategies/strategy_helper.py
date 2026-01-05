@@ -31,7 +31,7 @@ def get_category_helper(title: str, tech_stack: str) -> str:
         return 'Fullstack'
     if 'ai' in title:
         return 'AI'
-    if 'support' in title or 'wsparc' in title or 'konsult' in title or 'sre' in title:
+    if 'support' in title or 'wsparc' in title or 'konsult' in title or 'consultant' in title or 'sre' in title: 
         return 'Support'
 
     return ''
@@ -100,18 +100,56 @@ def get_years_of_experience_helper(node: BeautifulSoup) -> str:
     matches_en = re.findall(r'(?:\+|\()?\s*(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?)\s*\+?\s+year', text)
     return ", ".join(matches_pl + matches_en)
 
+europe_currency_iso_dict = {
+      "ALL": ["lek", "L"],	
+      "AMD": ["dram", "֏"], 	
+      "AZN": ["manat", "₼"],	
+      "BAM": ["mark", "KM"],	
+      "BYN": ["ruble", "Rbl"],	
+      "CHF": ["franc", "CHF"],	
+      "CZK": ["koruna", "Kč"],	
+      "DKK": ["krone", "kr."],	
+      "EUR": ["euro", "€"],	
+      "GBP": ["sterling", "£"],	
+      "GEL": ["lari", "₾"],	
+      "HUF": ["forint", "Ft."],	
+      "ISK": ["króna", "kr."],	
+      "MDL": ["leu", "L"],	
+      "MKD": ["denar", "DEN"],	
+      "NOK": ["krone", "kr."],	
+      "PLN": ["złoty", "zł"],	
+      "RON": ["leu", "lei"],	
+      "RSD": ["dinar", "DIN"],	
+      "RUB": ["ruble", "₽"],	
+      "SEK": ["krona", "kr."],	
+      "TRY": ["lira", "₺"],	
+      "UAH": ["hryvnia", "₴"],	
+    }
+
+def replace_currency_to_iso(text: str) -> str:
+    for key, common_names in europe_currency_iso_dict.items():
+        for common_name in common_names:
+            text = text.replace(common_name.lower(), key)
+            text = text.replace(common_name.lower(), key)
+            text = text.replace(common_name.upper(), key)
+
+    return text
+
 def remove_spaces_in_numbers(text: str) -> str:
     return re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', text)
+
+def get_salary_ranges_regex():
+    list_of_currencies = '| '.join(list(europe_currency_iso_dict.keys()))
+    return r'(\d+-)?(\d+)( ' + list_of_currencies + ')?'
+    #re.findall('(test (?:word1|word2))', 'test word1') if we didnt want to get currency
 
 def get_salary_helper(salary_section: BeautifulSoup) -> str: # TODO: triple check if works
     salary_text = get_text_helper(salary_section).upper()
     salary_text = salary_text.replace('B2B', '')
-    salary_text = salary_text.replace('ZŁ', 'PLN') # .replace(' PLN', 'PLN')
+    salary_text = replace_currency_to_iso(salary_text)
     salary_text = salary_text.replace(',00', '').replace('  ', ' ').replace(' - ', '-')
     salary_text = remove_spaces_in_numbers(salary_text)
-    salary_ranges = re.findall(r'(\d+-)?(\d+)( PLN)?', salary_text)
-
-    #re.findall('(test (?:word1|word2))', 'test word1') a way to handle to get salary types
+    salary_ranges = re.findall(get_salary_ranges_regex(), salary_text)
 
     salary_ranges_arr = [''.join(j for j in sub) for sub in salary_ranges]
 
