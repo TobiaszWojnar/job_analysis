@@ -6,10 +6,11 @@ This project is designed to help you collect, clean, analyze, and report on job 
 ### Project Vision
 1. **Link Collection**: Post lists of job offer links to the system.
 2. **Cleaner Module**: Removes duplicates and unnecessary URL parameters.
-3. **Queue System**: Cleaned links are published to a queue for asynchronous processing.
+3. **Queue System**: Cleaned links are published to a queue for asynchronous processing. *TBD if needed*
 4. **Scraper Module**: Consumes links from the queue, scrapes job pages, and extracts fields like years of experience, salary, tech stack, benefits, and location.
-5. **Database Storage**: Extracted data is saved to a database for further analysis.
-6. **Reporting Module**: Generates reports such as average salary per technology stack, word clouds for job types, and various graphs.
+5. **Data Normalization**: Normalizes extracted data, like years of experience, salary, tech stack, benefits, and location.
+6. **Database Storage**: Extracted data is saved to a database for further analysis.
+7. **Reporting Module**: Generates reports such as average salary per technology stack, word clouds for job types, and various graphs.
 
 ### Architecture Diagram
 ```mermaid
@@ -17,17 +18,23 @@ flowchart TD
     A[User posts list of links] --> B[Cleaner Module]
     B --> C[Queue]
     C --> D[Scraper Module]
-    D --> E[Database]
-    E --> F[Reporting Module]
+    D --> E[Data Normalization]
+    E --> F[Database Storage]
+    F --> G[Reporting Module]
 ```
 
 ## Database Schema
+
+### Job Offers Table
 The following fields are stored in the database for each job listing:
 
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `category` | VARCHAR | 'Data', 'Mobile', 'QA', 'Security', 'UX/UI', 'Ruby', 'Manager', 'DevOps', 'Backend', 'Frontend', 'Fullstack', 'AI', 'Support' |
 | `tech_stack` | TEXT | |
+| `frontend_stack` | TEXT | *TBD* |
+| `backend_stack` | TEXT | *TBD* |
+| `db_stack` | TEXT | *TBD* |
 | `comment` | TEXT | |
 | `status` | VARCHAR | 'sent', 'got response', 'not interested', 'meeting set', 'offer', 'rejected', 'other'|
 | `sent_date` | DATE | |
@@ -37,8 +44,8 @@ The following fields are stored in the database for each job listing:
 | `location` | VARCHAR | |
 | `location_type` | VARCHAR | 'remote', 'office', 'hybrid' |
 | `salary` | TEXT | |
-|`salary_min_normalized`| Number| |
-|`salary_max_normalized`| Number| |
+|`salary_min_normalized`| Number| *TBD* recalculted to PLN, monthly, nett value |
+|`salary_max_normalized`| Number| *TBD* recalculted to PLN, monthly, nett value |
 | `salary_type` | VARCHAR | 'UOP', 'B2B H', 'B2B M', 'Substitution', 'Dzieło', 'Zlecenie' |
 | `years_of_experience` | TEXT | |
 |`years_of_experience_normalized`| Number| |
@@ -52,6 +59,30 @@ The following fields are stored in the database for each job listing:
 | `full_offer` | TEXT | |
 | `date_of_access` | DATE | |
 
+### Companies Table TODO TBD
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | VARCHAR | |
+| `link` | VARCHAR | |
+| `description` | TEXT | |
+| `category` | VARCHAR | |
+| `number_of_employees`| Number | |
+| `found_date`| Date | |
+| `headquarters`| VARCHAR | |
+| `postings_per_categories`| VARCHAR | |
+
+### Technologies Table TODO TBD
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | VARCHAR | |
+| `category` | VARCHAR | |
+| `number_of_postings` | Number | |
+| `average_salary` | Number | |
+| `average_years_of_experience` | Number | |
+
+
 ## Scripts Usage
 
 ### 1. Data Collection
@@ -62,8 +93,9 @@ The following fields are stored in the database for each job listing:
    That will perform following steps:
    - initialize database
    - clean links
-   - add to queue
-   - scrape jobs
+   - add to queue 
+   - scrape jobs TODO clear new.txt after processing
+   - normalize data - years of experience, salary to PLN, monthly, nett value, tech stack
    - save to database
 
 #### 1.1 Initialize Database
@@ -79,7 +111,8 @@ python links-cleener.py input_file.txt [output_file.txt]
 ```
 
 #### 1.3 Scrape a Single Job
-Scrapes a job page and prints the data to the console (JSON format).
+Scrapes a job page and prints the data to the console (JSON format). #TODO add tests for helpers
+
 ```bash
 python scrape_job.py <url>
 ```
