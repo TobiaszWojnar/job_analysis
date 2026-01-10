@@ -23,10 +23,12 @@ def get_category_helper(title: str, tech_stack: str) -> str:
         return 'Manager'
     if 'devops' in title or 'automation' in title:
         return 'DevOps'
+    if 'embedded' in title:
+        return 'Embedded'
     if 'backend' in title or 'back-end' in title: # In what ??
         return 'Backend'
     if 'frontend' in title or 'front-end' in title:  # In what ??
-        return 'Frontend - '+get_frontend_subcategory(title, tech_stack)
+        return 'Frontend'
     if 'fullstack' in title or 'full-stack' in title or 'full stack' in title:  # In what ??
         return 'Fullstack'
     if 'ai' in title:
