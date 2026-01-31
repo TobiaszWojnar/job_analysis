@@ -17,11 +17,17 @@ def print_tech(category: str = ''):
     print(sorted(list(tech_tags)))
 
 def get_stats():
-    rows = get_columns(["salary_type","category","salary","years_of_experience"])
-    df = pd.DataFrame(rows, columns=["salary_type","category","salary","years_of_experience"])
-    filtered = df[(~df["salary_type"].str.contains('B2B H', na=False))]
-    filtered = filtered[(filtered["years_of_experience"].notna()) & (filtered["salary"] != '')]
-    print( filtered[filtered["category"]=='Fullstack'].sort_values(by='years_of_experience'))
+    columns_query = ["title","category","salary_min_normalized","salary_max_normalized","years_of_experience_normalized"]
+    
+    rows = get_columns(columns_query)
+    df = pd.DataFrame(rows, columns=columns_query)
+    # filtered = df[(~df["salary_type"].str.contains('B2B H', na=False))]
+    filtered = df[df["category"]=='Frontend'] # 'Fullstack'
+    filtered = filtered.drop(columns=["category"])
+
+    filtered = filtered[(filtered["salary_min_normalized"].notna())] # (filtered["years_of_experience_normalized"].notna()) & 
+    # filtered = filtered[(filtered["years_of_experience_normalized"] < 4 ) & (filtered["years_of_experience_normalized"] >= 0 )]
+    print( filtered.sort_values(by='years_of_experience_normalized'))
 
 
 def get_last_offers(number_of_offers: int = 10):
@@ -31,7 +37,7 @@ def get_last_offers(number_of_offers: int = 10):
 
 
 if __name__ == "__main__":
-    df = get_last_offers(8)
+    df = get_stats()
     print(df)
 
-    df.to_csv('reports/last_offers.csv', index=False)
+    # df.to_csv('reports/last_offers.csv', index=False)

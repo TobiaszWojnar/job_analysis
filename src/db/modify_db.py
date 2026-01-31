@@ -4,6 +4,14 @@ import os
 from dotenv import load_dotenv
 from typing import Callable, Any
 import re
+import logging
+
+logger = logging.getLogger(__name__)
+
+from ..utils.salary_utils import (
+    calculate_min_max,
+    calculate_years_normalized,
+)
 
 load_dotenv()
 
@@ -58,7 +66,10 @@ def save_to_postgres(data):
             data.get('benefits'),
             data.get('body'),
             data.get('full_offer'),
-            data.get('date_of_access')
+            data.get('date_of_access'),
+            data.get('salary_min_normalized'),
+            data.get('salary_max_normalized'),
+            data.get('years_of_experience_normalized')
         )
     )
     conn.commit()
@@ -114,8 +125,120 @@ def update_column_with_function(column_name: str, func: Callable[[Any], Any]) ->
     finally:
         cur.close()
         conn.close()
+        
+def normalize_salary() -> None:
+    """Normalize salary columns using the generic update function."""
+    columns = ['id', 'salary', 'salary_type', 'full_offer', 'salary_min_normalized', 'salary_max_normalized']
+    where_min = "salary_min_normalized is null and salary not like ''"
+    where_max = "salary_max_normalized is null and salary not like ''"
+    
+    def transform_min(row: tuple) -> int | None:
+        _, salary, salary_type, full_offer, salary_min, salary_max = row
+        if salary_min and salary_max:
+            return None
+        if salary is None or salary == '':
+            return None
+        min_value, _ = calculate_min_max(salary, salary_type, full_offer)
+        return min_value
+    
+    def transform_max(row: tuple) -> int | None:
+        _, salary, salary_type, full_offer, salary_min, salary_max = row
+        if salary_min and salary_max:
+            return None
+        if salary is None or salary == '':
+            return None
+        _, max_value = calculate_min_max(salary, salary_type, full_offer)
+        return max_value
+    
+    update_rows_with_function(
+        columns_to_fetch=columns,
+        column_to_update='salary_min_normalized',
+        transform_func=transform_min,
+        where_clause=where_min
+    )
+    
+    update_rows_with_function(
+        columns_to_fetch=columns,
+        column_to_update='salary_max_normalized',
+        transform_func=transform_max,
+        where_clause=where_max
+    )
+
+def update_rows_with_function(
+    columns_to_fetch: list[str],
+    column_to_update: str,
+    transform_func: Callable[[tuple], Any],
+    where_clause: str = ""
+) -> None:
+    """Generic function to update a column based on values from other columns.
+    
+    Args:
+        columns_to_fetch: List of column names to fetch (first should be 'id')
+        column_to_update: Name of the column to update
+        transform_func: Function that takes a tuple of fetched values and returns the new value.
+                       Should return None to skip updating that row.
+        where_clause: Optional WHERE clause (without 'WHERE' keyword) to filter rows
+    """
+    conn = psycopg2.connect(**DB_CONFIG)
+    cur = conn.cursor()
+
+    try:
+        # Build SELECT query
+        columns_sql = sql.SQL(", ").join(sql.Identifier(col) for col in columns_to_fetch)
+        select_query = sql.SQL("SELECT {} FROM job_offers").format(columns_sql)
+        
+        if where_clause:
+            select_query = sql.SQL("{} WHERE {}").format(select_query, sql.SQL(where_clause))
+        
+        update_query = sql.SQL("UPDATE job_offers SET {} = %s WHERE id = %s").format(
+            sql.Identifier(column_to_update)
+        )
+
+        cur.execute(select_query)
+        rows = cur.fetchall()
+        
+        total_rows = len(rows)
+        skipped_rows = 0
+        updated_rows = 0
+
+        for row in rows:
+            row_id = row[0]  # First column should be 'id'
+            
+            new_value = transform_func(row)
+
+            if new_value is None:
+                skipped_rows += 1
+                continue
+
+            cur.execute(update_query, (new_value, row_id))
+            updated_rows += 1
+        
+        conn.commit()
+        
+        logger.info(f"update_rows_with_function({column_to_update}): "
+                   f"matched={total_rows}, updated={updated_rows}, skipped={skipped_rows}")
+    except Exception as e:
+        logger.error(f"An error occurred updating {column_to_update}: {e}")
+        conn.rollback()
+    finally:
+        cur.close()
+        conn.close()
 
 
+def normalize_years_of_experience() -> None:
+    """Normalize years of experience column using the generic update function."""
+    def transform(row: tuple) -> int | None:
+        _, years_of_experience, years_of_experience_normalized = row
+        if years_of_experience_normalized is not None:
+            return None  # Skip if already normalized
+        return calculate_years_normalized(years_of_experience)
+    
+    update_rows_with_function(
+        columns_to_fetch=['id', 'years_of_experience', 'years_of_experience_normalized'],
+        column_to_update='years_of_experience_normalized',
+        transform_func=transform,
+        where_clause="years_of_experience not like '' and years_of_experience_normalized is null"
+    )
 
 def main():
     # removeprefix_column('company_description', 'O firmie')

@@ -40,8 +40,7 @@ def get_similar_links(links):
     conn = psycopg2.connect(**DB_CONFIG)
     cur = conn.cursor()
     
-    # Use ANY for cleaner array handling
-    cur.execute("SELECT link FROM job_offers WHERE link = ANY(%s)", (links,)) #TODO LIKE '{old_prefix}%'
+    cur.execute("SELECT link FROM job_offers WHERE link = ANY(%s)", (links,))
     existing = {row[0] for row in cur.fetchall()}
     
     cur.close()
@@ -55,7 +54,7 @@ def get_columns(column_list: list[str], where_clause: str = '', limit: int = 100
     if where_clause:
         where_clause = " WHERE " + where_clause
     
-    if limit:
+    if limit != -1:
         limit_clause = " LIMIT " + str(limit)
     else:
         limit_clause = ""

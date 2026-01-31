@@ -1,6 +1,12 @@
 from bs4 import BeautifulSoup
 import re
 
+from ...utils.salary_utils import (
+    get_salary_type,
+    get_salary
+)
+
+
 def get_category_helper(title: str, tech_stack: str) -> str:
     if not title:
         title = ''
@@ -19,7 +25,7 @@ def get_category_helper(title: str, tech_stack: str) -> str:
         return 'UX/UI'
     if 'ruby' in title:
         return 'Ruby'
-    if 'business analyst' in title or 'manager' in title or 'pmo' in title:
+    if 'business analyst' in title or 'manager' in title or 'pmo' in title or 'product owner' in title:
         return 'Manager'
     if 'devops' in title or 'automation' in title:
         return 'DevOps'
@@ -65,26 +71,9 @@ def get_salary_type_helper(salary_section: BeautifulSoup) -> str:
     if not salary_section:
         return ''
 
-    salary_text = get_text_helper(salary_section).lower()
+    salary_text = get_text_helper(salary_section)
 
-    found_types = []
-    if 'b2b' in salary_text:
-        if 'godz. | kontrakt b2b' in salary_text or 'godz. kontrakt b2b' in salary_text or 'hr. | b2b' in salary_text or 'hr. b2b' in salary_text:
-            found_types.append('B2B H')
-        elif 'mies. | kontrakt b2b' in salary_text or 'mth. | b2b' in salary_text or 'b2b) miesięcznie' in salary_text or 'mth. b2b' in salary_text:
-            found_types.append('B2B M')
-        else:
-            found_types.append('B2B')
-    if 'uop' in salary_text or 'umowa o pracę' in salary_text or 'of mandate' in salary_text or 'of employment' in salary_text:
-        found_types.append('UOP')
-    if 'substitution agreement' in salary_text:
-        found_types.append('Substitution')
-    if 'dzieło' in salary_text:
-        found_types.append('Dzieło')
-    if 'zlecenie' in salary_text:
-        found_types.append('Zlecenie')
-
-    return ', '.join(found_types)
+    return get_salary_type(salary_text)
 
 
 def get_text_helper(node: BeautifulSoup, replace_strs: list[str] = []) -> str:
@@ -102,59 +91,7 @@ def get_years_of_experience_helper(node: BeautifulSoup) -> str:
     matches_en = re.findall(r'(?:\+|\()?\s*(\d+(?:\.\d+)?(?:-\d+(?:\.\d+)?)?)\s*\+?\s+year', text)
     return ", ".join(matches_pl + matches_en)
 
-europe_currency_iso_dict = {
-      "ALL": ["lek", "L"],	
-      "AMD": ["dram", "֏"], 	
-      "AZN": ["manat", "₼"],	
-      "BAM": ["mark", "KM"],	
-      "BYN": ["ruble", "Rbl"],	
-      "CHF": ["franc", "CHF"],	
-      "CZK": ["koruna", "Kč"],	
-      "DKK": ["krone", "kr."],	
-      "EUR": ["euro", "€"],	
-      "GBP": ["sterling", "£"],	
-      "GEL": ["lari", "₾"],	
-      "HUF": ["forint", "Ft."],	
-      "ISK": ["króna", "kr."],	
-      "MDL": ["leu", "L"],	
-      "MKD": ["denar", "DEN"],	
-      "NOK": ["krone", "kr."],	
-      "PLN": ["złoty", "zł"],	
-      "RON": ["leu", "lei"],	
-      "RSD": ["dinar", "DIN"],	
-      "RUB": ["ruble", "₽"],	
-      "SEK": ["krona", "kr."],	
-      "TRY": ["lira", "₺"],	
-      "UAH": ["hryvnia", "₴"],	
-      "USD": ["dollar", "$"],
-    }
 
-def replace_currency_to_iso(text: str) -> str:
-    for key, common_names in europe_currency_iso_dict.items():
-        for common_name in common_names:
-            text = text.replace(common_name.lower(), key)
-            text = text.replace(common_name.lower(), key)
-            text = text.replace(common_name.upper(), key)
-
-    return text
-
-def remove_spaces_in_numbers(text: str) -> str:
-    return re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', text)
-
-def get_salary_ranges_regex():
-    list_of_currencies = '| '.join(list(europe_currency_iso_dict.keys()))
-    return r'(\d+-)?(\d+)( ' + list_of_currencies + ')?'
-    #re.findall('(test (?:word1|word2))', 'test word1') if we didnt want to get currency
-
-def get_salary_helper(salary_section: BeautifulSoup) -> str: # TODO: triple check if works
-    salary_text = get_text_helper(salary_section).upper()
-    salary_text = salary_text.replace('B2B', '')
-    salary_text = replace_currency_to_iso(salary_text)
-    salary_text = salary_text.replace(',00', '').replace('  ', ' ').replace(' - ', '-')
-    salary_text = remove_spaces_in_numbers(salary_text)
-    salary_ranges = re.findall(get_salary_ranges_regex(), salary_text)
-
-    salary_ranges_arr = [''.join(j for j in sub) for sub in salary_ranges]
-
-    stringify = ", ".join(salary_ranges_arr)
-    return stringify
+def get_salary_helper(salary_section: BeautifulSoup) -> str:
+    salary_text = get_text_helper(salary_section)
+    return get_salary(salary_text)

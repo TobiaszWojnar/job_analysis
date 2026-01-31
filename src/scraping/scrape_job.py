@@ -9,6 +9,8 @@ from src.scraping.strategies.pracuj_strategy import PracujStrategy
 from src.scraping.strategies.nofluff_strategy import NoFluffStrategy
 from src.scraping.strategies.protocol_strategy import ProtocolStrategy
 
+# # Uncomment when running this file as main for debugging purposes
+
 # from strategies.base_strategy import BaseJobStrategy
 # from strategies.pracuj_strategy import PracujStrategy
 # from strategies.nofluff_strategy import NoFluffStrategy
@@ -62,6 +64,9 @@ def scrape_job_page(url: str) -> dict:
         'requirements': strategy.get_requirements(soup),
         'benefits': strategy.get_benefits(soup),
         'full_offer': strategy.get_full_offer(soup),
+        'salary_min_normalized': strategy.get_salary_min_normalized(soup),
+        'salary_max_normalized': strategy.get_salary_max_normalized(soup),
+        'years_of_experience_normalized': strategy.get_years_of_experience_normalized(soup)
     }
 
 def get_strategy(url: str) -> BaseJobStrategy:
@@ -81,7 +86,7 @@ if __name__ == "__main__":
     #     sys.exit(1)
     # url = sys.argv[1]
 
-    url = "https://www.pracuj.pl/praca/analityk-biznesowy-katowice,oferta,1004548049"
+    url = "https://nofluffjobs.com/pl/job/php-laravel-developer-cstore-remote"
 
     try:
         result = scrape_job_page(url)
