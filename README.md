@@ -44,9 +44,9 @@ The following fields are stored in the database for each job listing:
 | `location` | VARCHAR | |
 | `location_type` | VARCHAR | 'remote', 'office', 'hybrid' |
 | `salary` | TEXT | |
-|`salary_min_normalized`| Number| *TBD* recalculted to PLN, monthly, nett value |
-|`salary_max_normalized`| Number| *TBD* recalculted to PLN, monthly, nett value |
-| `salary_type` | VARCHAR | 'UOP', 'B2B H', 'B2B M', 'Substitution', 'Dzieło', 'Zlecenie' |
+|`salary_min_normalized`| Number| recalculted to PLN, monthly, nett value |
+|`salary_max_normalized`| Number| recalculted to PLN, monthly, nett value |
+| `salary_type` | VARCHAR | 'UOP', 'B2B H', 'B2B M', 'Substitution', 'Dzieło', 'UZ' |
 | `years_of_experience` | TEXT | |
 |`years_of_experience_normalized`| Number| |
 | `company` | VARCHAR | |

@@ -91,7 +91,7 @@ def get_salary_type(salary_section: str) -> str:
     if 'dzieło' in salary_section:
         found_types.append('Dzieło')
     if 'zlecenie' in salary_section:
-        found_types.append('Zlecenie')
+        found_types.append('UZ')
 
     return ', '.join(found_types)
 
@@ -131,8 +131,8 @@ def get_salary_types_sorted(salary_types: str) -> list[str]:
     result = []
     if 'B2B H' in salary_types:
         result.append('B2B H')
-    if 'Zlecenie' in salary_types: # TODO use UZ instead of Zlecenie, update in conde and in DB
-        result.append('Zlecenie')
+    if 'UZ' in salary_types:
+        result.append('UZ')
     if 'UOP' in salary_types:
         result.append('UOP')
     if 'Dzieło' in salary_types:
@@ -179,7 +179,7 @@ def calculate_min_max(salary_ranges: str, salary_type: str, full_offer: str) -> 
     # Net coefficients for different contract types based on gross-net.png
     dzielo = 0.904
     b2b_m = 0.7703
-    zlecenie = 0.7223
+    uz = 0.7223
     uop = 0.7
     b2b_h = 160 * b2b_m
 
@@ -232,9 +232,9 @@ def calculate_min_max(salary_ranges: str, salary_type: str, full_offer: str) -> 
             salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * dzielo), salary_min or float("inf"))
             salary_max = max(int(convert_to_pln(salary_range[1], salary_ccy) * dzielo), salary_max or 0)
 
-        if 'Zlecenie' in salary_type_tmp:
-            salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * zlecenie), salary_min or float("inf"))
-            salary_max = max(int(convert_to_pln(salary_range[1], salary_ccy) * zlecenie), salary_max or 0)
+        if 'UZ' in salary_type_tmp:
+            salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * uz), salary_min or float("inf"))
+            salary_max = max(int(convert_to_pln(salary_range[1], salary_ccy) * uz), salary_max or 0)
     
     if salary_min is None:
         return None, None
