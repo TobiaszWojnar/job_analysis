@@ -22,6 +22,9 @@ job_offers:[
     "benefits",
     "body",
     "full_offer",
+    "salary_min_normalized",
+    "salary_max_normalized",
+    "years_of_experience_normalized",
     "date_of_access"
     # ("id", int),
     # ("category", ["Data", "Mobile", "QA", "Security", "UX/UI", "Ruby", "Manager", "DevOps", "Backend", "Frontend", "Fullstack", "AI", "Support"]), 
@@ -46,5 +49,8 @@ job_offers:[
     # ("body", TEXT),
     # ("full_offer", TEXT),
     # ("date_of_access", DATE)
+    # ("salary_min_normalized", int),
+    # ("salary_max_normalized", int),
+    # ("years_of_experience_normalized", int)
 ]
 }
