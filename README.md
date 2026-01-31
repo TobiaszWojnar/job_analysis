@@ -151,10 +151,7 @@ python reporting.py
 
 
 **TODO**
-- if link is to the same page with just different parameter, append it
-- add subcategories
-- add normalization for salary
-- add normalization for years of experience
-- learning how to use rabbitmq
-- Asynchronous queue and scraper
+- Catogerize technology tags
+- Schetch up UI for reporting
+- Add subcategories
 - Reporting and analytics (graphs, word clouds, salary stats, tech tags per category)
