@@ -151,6 +151,7 @@ python reporting.py
 
 
 **TODO**
+- add support to use db schema in queries
 - Catogerize technology tags
 - Schetch up UI for reporting
 - Add subcategories
