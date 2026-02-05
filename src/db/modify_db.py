@@ -34,14 +34,14 @@ def save_to_postgres(data):
                 link, title, location, location_type, salary, salary_type, 
                 years_of_experience, company, company_link, company_description, 
                 responsibilities, requirements, benefits, 
-                body, full_offer, date_of_access
+                body, full_offer, date_of_access, salary_min_normalized, salary_max_normalized, years_of_experience_normalized
             )
             VALUES (
                 %s, %s, %s, %s, %s, %s, 
                 %s, %s, %s, %s, %s, %s, 
                 %s, %s, %s, %s, 
                 %s, %s, %s, %s, 
-                %s, %s
+                %s, %s, %s, %s, %s
             )
         """),
         (
