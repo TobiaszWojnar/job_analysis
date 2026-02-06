@@ -21,9 +21,9 @@ class NoFluffStrategy(BaseJobStrategy):
         if company_description:
             return get_text_helper(company_description)
         
-        commonpostingdescription = soup.find(attrs={'data-cy-section': 'JobOffer_Project'}).find_all('p')
-        if commonpostingdescription:
-            return ", ".join(get_text_helper(p,['Oferujemy:','Opis firmy']) for p in commonpostingdescription)
+        postingdescription = soup.find(attrs={'data-cy-section': 'JobOffer_Project'})
+        if postingdescription and postingdescription.find_all('p'):
+            return ", ".join(get_text_helper(p,['Oferujemy:','Opis firmy']) for p in postingdescription.find_all('p'))
         return ''
 
     def get_category(self, soup: BeautifulSoup) -> str:
