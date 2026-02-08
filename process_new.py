@@ -60,6 +60,10 @@ def main():
     print(f"Number of saved links: {len(urls) - number_of_errors}")
     print(f"Number of errors: {number_of_errors}")
 
+    # Clear the links file
+    with open(links_file, 'w'):
+        pass
+
 
 if __name__ == "__main__":
     main()
