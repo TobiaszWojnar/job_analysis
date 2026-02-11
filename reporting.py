@@ -8,13 +8,13 @@ def print_all_titles():
         print(row[0])
 
 
-def print_tech(category: str = ''):
+def print_tech(category: str = '', print_fn=print):
     rows = set(get_columns(['tech_stack','category'], where_clause=f"category LIKE '{category}'"))
     tech_tags = []
     for row in rows:
         tech_tags +=row[0].split(',')
     tech_tags = set(map(str.strip,tech_tags))
-    print(sorted(list(tech_tags)))
+    print_fn(sorted(list(tech_tags)))
 
 def get_stats():
     columns_query = ["title","category","salary_min_normalized","salary_max_normalized","years_of_experience_normalized"]
@@ -22,7 +22,7 @@ def get_stats():
     rows = get_columns(columns_query)
     df = pd.DataFrame(rows, columns=columns_query)
     # filtered = df[(~df["salary_type"].str.contains('B2B H', na=False))]
-    filtered = df[df["category"]=='Frontend'] # 'Fullstack'
+    filtered = df[df["category"]=='Data'] # 'Fullstack', 'Frontend'
     filtered = filtered.drop(columns=["category"])
 
     filtered = filtered[(filtered["salary_min_normalized"].notna())] # (filtered["years_of_experience_normalized"].notna()) & 
@@ -37,7 +37,8 @@ def get_last_offers(number_of_offers: int = 10):
 
 
 if __name__ == "__main__":
-    df = get_stats()
-    print(df)
+    # df = get_stats()
+    # print(df)
+    print_tech(category='Data', print_fn=print)
 
     # df.to_csv('reports/last_offers.csv', index=False)
