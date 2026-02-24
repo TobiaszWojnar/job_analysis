@@ -8,6 +8,7 @@ from src.scraping.strategies.base_strategy import BaseJobStrategy
 from src.scraping.strategies.pracuj_strategy import PracujStrategy
 from src.scraping.strategies.nofluff_strategy import NoFluffStrategy
 from src.scraping.strategies.protocol_strategy import ProtocolStrategy
+from src.scraping.strategies.justjoinit_strategy import JustJoinItStrategy
 
 # # Uncomment when running this file as main for debugging purposes
 
@@ -76,6 +77,8 @@ def get_strategy(url: str) -> BaseJobStrategy:
         return NoFluffStrategy()
     if "theprotocol.it" in url:
         return ProtocolStrategy()
+    if "justjoin.it" in url:
+        return JustJoinItStrategy()
     
     # Default fallback or raise error
     raise ValueError(f"No strategy found for URL: {url}")

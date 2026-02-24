@@ -58,9 +58,11 @@ def remove_spaces_in_numbers(text: str) -> str:
         Text with spaces removed from numbers
     """
     return re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', text)
+    # # Remove spaces around decimal points/commas if they are between digits: '10 000 , 50' -> '10000,50'
+    # text = re.sub(r'(?<=\d)[ \u00A0]*([.,])[ \u00A0]*(?=\d)', r'\1', text)
 
 
-salary_ranges_regex = r'(\d+-)?(\d+)( ' + '| '.join(list(EUROPE_CURRENCY_ISO_DICT.keys())) + r')?'
+salary_ranges_regex = r'(\d+(?:\.\d+)?-)?(\d+(?:\.\d+)?)( ' + '| '.join(list(EUROPE_CURRENCY_ISO_DICT.keys())) + r')?'
 
 
 
@@ -82,16 +84,18 @@ def get_salary_type(salary_section: str) -> str:
             found_types.append('B2B H')
         elif 'mies. | kontrakt b2b' in salary_section or 'mth. | b2b' in salary_section or 'b2b) miesięcznie' in salary_section or 'mth. b2b' in salary_section:
             found_types.append('B2B M')
+        elif 'Net per day - B2B' in salary_section:
+            found_types.append('B2B D')
         else:
             found_types.append('B2B')
-    if 'uop' in salary_section or 'umowa o pracę' in salary_section or 'of mandate' in salary_section or 'of employment' in salary_section:
+    if 'uop' in salary_section or 'umowa o pracę' in salary_section or 'of employment' in salary_section or 'permanent' in salary_section:
         found_types.append('UOP')
+    if 'uz' in salary_section or 'mandate' in salary_section or 'zlecenie' in salary_section:
+        found_types.append('UZ')
     if 'substitution agreement' in salary_section:
         found_types.append('Substitution')
     if 'dzieło' in salary_section:
         found_types.append('Dzieło')
-    if 'zlecenie' in salary_section:
-        found_types.append('UZ')
 
     return ', '.join(found_types)
 
@@ -108,7 +112,10 @@ def get_salary(salary_section: str) -> str:
     salary_text = salary_section.upper()
     salary_text = salary_text.replace('B2B', '')
     salary_text = replace_currency_to_iso(salary_text)
-    salary_text = salary_text.replace(',00', '').replace('  ', ' ').replace(' - ', '-')
+    salary_text = salary_text.replace('  ', ' ').replace(' - ', '-')
+    # Handle decimal commas (e.g., 7 000,00 -> 7000 or 7 000,50 -> 7000.50)
+    salary_text = re.sub(r',(\d{2})\b', r'.\1', salary_text)
+    salary_text = salary_text.replace('.00', '')
     salary_text = remove_spaces_in_numbers(salary_text)
     salary_ranges = re.findall(salary_ranges_regex, salary_text)
 
@@ -139,6 +146,8 @@ def get_salary_types_sorted(salary_types: str) -> list[str]:
         result.append('Dzieło')
     if 'B2B M' in salary_types:
         result.append('B2B M')
+    if 'B2B D' in salary_types:
+        result.append('B2B D')
     return result
 
 
@@ -181,6 +190,7 @@ def calculate_min_max(salary_ranges: str, salary_type: str, full_offer: str) -> 
     b2b_m = 0.7703
     uz = 0.7223
     uop = 0.7
+    b2b_d = 20 * b2b_m
     b2b_h = 160 * b2b_m
 
     if not salary_ranges or not salary_type:
@@ -223,6 +233,10 @@ def calculate_min_max(salary_ranges: str, salary_type: str, full_offer: str) -> 
         if 'B2B M' in salary_type_tmp:
             salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * b2b_m), salary_min or float("inf"))
             salary_max = max(int(convert_to_pln(salary_range[1], salary_ccy) * b2b_m), salary_max or 0)
+
+        if 'B2B D' in salary_type_tmp:
+            salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * b2b_d), salary_min or float("inf"))
+            salary_max = max(int(convert_to_pln(salary_range[1], salary_ccy) * b2b_d), salary_max or 0)
 
         if 'UOP' in salary_type_tmp:
             salary_min = min(int(convert_to_pln(salary_range[0], salary_ccy) * uop), salary_min or float("inf"))
