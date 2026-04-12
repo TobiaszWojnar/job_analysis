@@ -62,9 +62,33 @@ def remove_spaces_in_numbers(text: str) -> str:
     # text = re.sub(r'(?<=\d)[ \u00A0]*([.,])[ \u00A0]*(?=\d)', r'\1', text)
 
 
-salary_ranges_regex = r'(\d+(?:\.\d+)?-)?(\d+(?:\.\d+)?)( ' + '| '.join(list(EUROPE_CURRENCY_ISO_DICT.keys())) + r')?'
+SALARY_RANGES_REGEX = r'(\d+(?:\.\d+)?-)?(\d+(?:\.\d+)?)( ' + '| '.join(list(EUROPE_CURRENCY_ISO_DICT.keys())) + r')?'
 
+B2B_MONTHLY_MARKERS = (
+    "mies. | kontrakt b2b",
+    "mth. | b2b",
+    "b2b) miesięcznie",
+    "mth. b2b",
+    "net per month - b2b",
+)
 
+B2B_HOUR_MARKERS = (
+    "godz. | kontrakt b2b",
+    "godz. kontrakt b2b",
+    "hr. | b2b",
+    "hr. b2b",
+)
+
+B2B_DAY_MARKERS = (
+    "net per day - b2b",
+)
+
+UOP_MARKERS = (
+    "uop",
+    "umowa o pracę",
+    "of employment",
+    "permanent",
+)
 
 def get_salary_type(salary_section: str) -> str:
     """Extract salary type from a salary section.
@@ -80,15 +104,15 @@ def get_salary_type(salary_section: str) -> str:
 
     found_types = []
     if 'b2b' in salary_section:
-        if 'godz. | kontrakt b2b' in salary_section or 'godz. kontrakt b2b' in salary_section or 'hr. | b2b' in salary_section or 'hr. b2b' in salary_section:
+        if any(marker in salary_section for marker in B2B_HOUR_MARKERS):
             found_types.append('B2B H')
-        elif 'mies. | kontrakt b2b' in salary_section or 'mth. | b2b' in salary_section or 'b2b) miesięcznie' in salary_section or 'mth. b2b' in salary_section:
+        elif any(marker in salary_section for marker in B2B_MONTHLY_MARKERS):
             found_types.append('B2B M')
-        elif 'Net per day - B2B' in salary_section:
+        elif any(marker in salary_section for marker in B2B_DAY_MARKERS):
             found_types.append('B2B D')
         else:
             found_types.append('B2B')
-    if 'uop' in salary_section or 'umowa o pracę' in salary_section or 'of employment' in salary_section or 'permanent' in salary_section:
+    if any(marker in salary_section for marker in UOP_MARKERS):
         found_types.append('UOP')
     if 'uz' in salary_section or 'mandate' in salary_section or 'zlecenie' in salary_section:
         found_types.append('UZ')
@@ -97,8 +121,17 @@ def get_salary_type(salary_section: str) -> str:
     if 'dzieło' in salary_section:
         found_types.append('Dzieło')
 
+    # Umowa na zastępstwo
+
     return ', '.join(found_types)
 
+DAYS_LEFT_PATTERN = re.compile(
+    r'\s*\b\d+\s*DAY(?:S)?\s*LEFT\s*\(UNTIL\s*\d{1,2}\.\d{1,2}\.\d{4}\)',
+    flags=re.IGNORECASE
+)
+
+def remove_days_left(text: str) -> str:
+    return DAYS_LEFT_PATTERN.sub('', text).strip()
 
 def get_salary(salary_section: str) -> str:
     """Extract and parse salary ranges from a salary section.
@@ -109,7 +142,9 @@ def get_salary(salary_section: str) -> str:
     Returns:
         Comma-separated salary ranges (e.g., '16800-18480 PLN')
     """
+    
     salary_text = salary_section.upper()
+    salary_text = remove_days_left(salary_text)
     salary_text = salary_text.replace('B2B', '')
     salary_text = replace_currency_to_iso(salary_text)
     salary_text = salary_text.replace('  ', ' ').replace(' - ', '-')
@@ -117,7 +152,7 @@ def get_salary(salary_section: str) -> str:
     salary_text = re.sub(r',(\d{2})\b', r'.\1', salary_text)
     salary_text = salary_text.replace('.00', '')
     salary_text = remove_spaces_in_numbers(salary_text)
-    salary_ranges = re.findall(salary_ranges_regex, salary_text)
+    salary_ranges = re.findall(SALARY_RANGES_REGEX, salary_text)
 
     salary_ranges_arr = [''.join(j for j in sub) for sub in salary_ranges]
 

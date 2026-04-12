@@ -39,6 +39,6 @@ def get_last_offers(number_of_offers: int = 10):
 if __name__ == "__main__":
     # df = get_stats()
     # print(df)
-    print_tech(category='Data', print_fn=print)
-
+    # print_tech(category='Data', print_fn=print)
+    normalize_salary()
     # df.to_csv('reports/last_offers.csv', index=False)

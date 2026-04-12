@@ -7,7 +7,7 @@ from ...utils.salary_utils import (
 )
 
 
-def get_category_helper(title: str, tech_stack: str) -> str:
+def get_category_helper(title: str, tech_stack: str, breadcrumbs: str = '') -> str:
     if not title:
         title = ''
     title = title.lower()
@@ -37,10 +37,13 @@ def get_category_helper(title: str, tech_stack: str) -> str:
         return 'Frontend'
     if 'fullstack' in title or 'full-stack' in title or 'full stack' in title:  # In what ??
         return 'Fullstack'
-    if 'ai' in title:
+    if 'ai' in title or 'ml' in title:
         return 'AI'
     if 'support' in title or 'wsparc' in title or 'konsult' in title or 'consultant' in title or 'sre' in title: 
         return 'Support'
+
+    if breadcrumbs:
+        return get_category_helper(breadcrumbs.lower(),tech_stack)
 
     return ''
 

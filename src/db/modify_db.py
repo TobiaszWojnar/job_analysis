@@ -244,7 +244,8 @@ def main():
     # removeprefix_column('company_description', 'O firmie')
     # removeprefix_column('benefits', 'Udogodnienia w biurze')
     # add_prefix_column('company_link', '/praca?', 'https://theprotocol.it/praca?')
-    update_column_with_function('salary', lambda x:re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', x) if x else x)
+    # update_column_with_function('salary', lambda x:re.sub(r'(?<=\d)[ \u00A0](?=\d)', '', x) if x else x)
+    normalize_salary()
     print("Done")
 
 if __name__ == "__main__":

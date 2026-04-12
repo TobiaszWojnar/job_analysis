@@ -51,9 +51,6 @@ def main():
         except Exception as e:
             logging.error(f"  -> Error processing {url}: {e}")
             number_of_errors += 1
-        
-        # Be nice to the server
-        time.sleep(1)
 
     print("\n--- Final Report ---")
     print(f"Number of processed links: {len(urls)}")
