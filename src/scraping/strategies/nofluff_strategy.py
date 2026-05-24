@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
 import re
 from .base_strategy import BaseJobStrategy
-from .strategy_helper import get_category_helper, get_text_helper, get_salary_type_helper, get_salary_helper, get_years_of_experience_helper
+from .strategy_helper import get_text_helper, get_salary_type_helper, get_salary_helper, get_years_of_experience_helper
+from ...utils.category_utils import get_category_helper
 
 class NoFluffStrategy(BaseJobStrategy):
     def get_title(self, soup: BeautifulSoup) -> str:
@@ -27,11 +28,14 @@ class NoFluffStrategy(BaseJobStrategy):
         return ''
 
     def get_category(self, soup: BeautifulSoup) -> str:
-        category = get_category_helper(self.get_title(soup), self.get_tech_stack(soup))
-        if category:
-            return category
-        return get_category_helper(get_text_helper(soup.find(attrs={'commonpostingcattech':''})), self.get_tech_stack(soup))
-
+        category = get_category_helper(
+            self.get_title(soup), 
+            self.get_tech_stack(soup), 
+            self.get_full_offer(soup),
+            get_text_helper(soup.find(attrs={'commonpostingcattech':''}))
+        )
+        return category
+        
 
     def get_tech_stack(self, soup: BeautifulSoup) -> str:
         expected_section = soup.find(attrs={'branch': 'musts'})

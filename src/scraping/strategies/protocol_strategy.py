@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
 import re
 from .base_strategy import BaseJobStrategy
-from .strategy_helper import get_category_helper, get_salary_type_helper, get_text_helper, get_years_of_experience_helper, get_salary_helper
+from .strategy_helper import get_salary_type_helper, get_text_helper, get_years_of_experience_helper, get_salary_helper
+from ...utils.category_utils import get_category_helper
 
 class ProtocolStrategy(BaseJobStrategy):
     def get_title(self, soup: BeautifulSoup) -> str:
@@ -27,11 +28,20 @@ class ProtocolStrategy(BaseJobStrategy):
         return about_us_description + "\n" + work_description
 
     def get_category(self, soup: BeautifulSoup) -> str:
-        return get_category_helper(self.get_title(soup), self.get_tech_stack(soup))
+        category = get_category_helper(
+            self.get_title(soup), 
+            self.get_tech_stack(soup), 
+            self.get_full_offer(soup)
+        )
+        return category
 
     def get_tech_stack(self, soup: BeautifulSoup) -> str:
-        technologies = soup.find(id="REQUIREMENTS").find_all('span')
+        requirements_node = soup.find(id="REQUIREMENTS")
+        if not requirements_node:
+            return ''
+        technologies = requirements_node.find_all('span')
         return ", ".join([get_text_helper(tech) for tech in technologies])
+
 
     def get_location(self, soup: BeautifulSoup) -> str:
         return get_text_helper(soup.find(attrs={'data-test':'text-primaryLocation'}))
@@ -57,6 +67,8 @@ class ProtocolStrategy(BaseJobStrategy):
 
     def get_responsibilities(self, soup: BeautifulSoup) -> str:
         responsibilities_section = soup.find(attrs={'data-test': 'section-responsibilities'})
+        if not responsibilities_section:
+            return ''
         responsibilities = responsibilities_section.find_all('li')
         if responsibilities:
             return ", ".join([get_text_helper(responsibility) for responsibility in responsibilities])
@@ -71,9 +83,10 @@ class ProtocolStrategy(BaseJobStrategy):
 
     def get_benefits(self, soup: BeautifulSoup) -> str:
         benefits_section = soup.find(attrs={"data-test":"PROGRESS_AND_BENEFITS"})
-        benefits = benefits_section.find_all('li')
-        if benefits:
+        if benefits_section and benefits_section.find_all('li'):
+            benefits = benefits_section.find_all('li')
             return ", ".join([get_text_helper(benefit) for benefit in benefits])
+            
         return get_text_helper(benefits_section)
 
     def get_full_offer(self, soup: BeautifulSoup) -> str:

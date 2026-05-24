@@ -2,15 +2,17 @@ from bs4 import BeautifulSoup
 import re
 from .base_strategy import BaseJobStrategy
 from .strategy_helper import (
-    get_category_helper,
     get_text_helper,
     get_salary_type_helper,
     get_salary_helper,
     get_years_of_experience_helper,
 )
-from ...utils.salary_utils import (
-    get_salary as get_salary_util,
-    get_salary_type as get_salary_type_util,
+from ...utils.category_utils import get_category_helper
+from ..llm_scraper import (
+    get_responsibilities_with_llm,
+    get_requirements_with_llm,
+    get_benefits_with_llm,
+    get_location_type_with_llm,
 )
 
 
@@ -54,6 +56,7 @@ class JustJoinItStrategy(BaseJobStrategy):
         category = get_category_helper(
             self.get_title(soup),
             self.get_tech_stack(soup),
+            self.get_full_offer(soup),
             get_text_helper(breadcrumbs),
         )
         return category
@@ -97,103 +100,46 @@ class JustJoinItStrategy(BaseJobStrategy):
 
     def get_location_type(self, soup: BeautifulSoup) -> str:  # TODO improve
         text = soup.get_text().lower()
-        if "remote" in text or "zdalna" in text:
-            return "remote"
-        if "hybrid" in text or "hybrydowa" in text:
-            return "hybrid"
-        return "office"
+
+        return get_location_type_with_llm(text)
+        # if "remote" in text or "zdalna" in text:
+        #     return "remote"
+        # if "hybrid" in text or "hybrydowa" in text:
+        #     return "hybrid"
+        # return "office"
 
     def get_salary(self, soup: BeautifulSoup) -> str:
-        salary_section = soup.find(
+        salary_node = soup.find(
             "span", string=re.compile("Salary", re.IGNORECASE)
-        ).find_parent("div")
-        return get_salary_helper(salary_section)
+        )
+        if salary_node: 
+            salary_section = salary_node.find_parent("div")
+            return get_salary_helper(salary_section)
+        return ''
 
     def get_salary_type(self, soup: BeautifulSoup) -> str:
-        salary_section = soup.find(
+        salary_node = soup.find(
             "span", string=re.compile("Salary", re.IGNORECASE)
-        ).find_parent("div")
-        return get_salary_type_helper(salary_section)
+        )
+        if salary_node: 
+            salary_section = salary_node.find_parent("div")
+            return get_salary_type_helper(salary_section)
+        return ''
 
     def get_years_of_experience(self, soup: BeautifulSoup) -> str:
         return get_years_of_experience_helper(soup)
 
     def get_responsibilities(self, soup: BeautifulSoup) -> str:
-        responsibilities_tags = [
-            "Responsibilities:",
-            "Key Responsibilities:",
-            "Zakres obowiązków",
-            "Główne zadania",
-            "Zakres pracy",
-            "ZADANIA",
-        ]
-        responsibilities_list = []
-
-        for req in responsibilities_tags:
-            section_title = soup.find("strong", string=re.compile(req, re.IGNORECASE))
-            if section_title:
-                section_title = section_title.find_parent()
-            else: 
-                section_title = soup.find("p", string=re.compile(req, re.IGNORECASE))
-            if section_title:
-                responsibilities_list.append(
-                    get_text_helper(section_title.find_next_sibling("ul"))
-                )
-
-        return ", ".join(responsibilities_list) if responsibilities_list else ""
+        page_text = soup.get_text(separator=" ", strip=True)
+        return get_responsibilities_with_llm(page_text)
 
     def get_requirements(self, soup: BeautifulSoup) -> str:
-        requirements_tags = [
-            "Nice to haves:",
-            "Requirements:",
-            "Profil Kandydata",
-            "Oczekiwane doświadczenie:",
-            "Oczekiwania:",
-            "We would like you to have the following:",
-            "Must-have:",
-            "Nice-to-have:",
-            "Wymagania",
-            "Nice to have",
-            "OD CIEBIE OCZEKUJEMY",
-        ]
-        requirements_list = []
-
-        for req in requirements_tags:
-            section_title = soup.find("strong", string=re.compile(req, re.IGNORECASE))
-            if section_title:
-                section_title = section_title.find_parent()
-            else: 
-                section_title = soup.find("p", string=re.compile(req, re.IGNORECASE))
-            if section_title:
-                requirements_list.append(
-                    get_text_helper(section_title.find_next_sibling("ul"))
-                )
-
-        return ", ".join(requirements_list) if requirements_list else ""
+        page_text = soup.get_text(separator=" ", strip=True)
+        return get_requirements_with_llm(page_text)
 
     def get_benefits(self, soup: BeautifulSoup) -> str:
-        benefits_tags = [
-            "We offer:",
-            "Why Join:",
-            "What you can expect:",
-            "OFERUJEMY",
-        ]
-        benefits_list = []
-        for benefit in benefits_tags:
-            section_title = soup.find(
-                "strong", string=re.compile(benefit, re.IGNORECASE)
-            )
-            if section_title:
-                section_title = section_title.find_parent()
-            else: 
-                section_title = soup.find(
-                    "p", string=re.compile(benefit, re.IGNORECASE)
-                )
-            if section_title:
-                benefits_list.append(
-                    get_text_helper(section_title.find_next_sibling("ul"))
-                )
-        return ", ".join(benefits_list) if benefits_list else ""
+        page_text = soup.get_text(separator=" ", strip=True)
+        return get_benefits_with_llm(page_text)
 
     def get_full_offer(self, soup: BeautifulSoup) -> str:
         return get_text_helper(soup)

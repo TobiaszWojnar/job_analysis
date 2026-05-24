@@ -1,6 +1,5 @@
 import argparse
 import sys
-import time
 import logging
 from src.scraping.scrape_job import scrape_job_page
 from src.links_cleaner import clean_links
