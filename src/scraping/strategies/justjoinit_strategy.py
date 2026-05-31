@@ -45,7 +45,7 @@ class JustJoinItStrategy(BaseJobStrategy):
         who_we_are_header = soup.find(
             "strong", string=re.compile("Who we are:", re.IGNORECASE)
         )
-        if who_we_are_header and who_we_are_header:
+        if who_we_are_header and who_we_are_header.find_parent():
             return get_text_helper(
                 who_we_are_header.find_parent().find_next_sibling("p")
             )
