@@ -2,16 +2,17 @@ import os
 from bs4 import BeautifulSoup
 from justjoinit_strategy import JustJoinItStrategy
 
+
 def test_file(file_path, output_file, strategy):
     output_file.write(f"\nTesting file: {file_path}\n")
     if not os.path.exists(file_path):
         output_file.write("File not found.\n")
         return
 
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         html = f.read()
 
-    soup = BeautifulSoup(html, 'html.parser')
+    soup = BeautifulSoup(html, "html.parser")
 
     output_file.write(f"Title: {strategy.get_title(soup)}\n")
     output_file.write(f"Company: {strategy.get_company(soup)}\n")
@@ -26,11 +27,11 @@ def test_file(file_path, output_file, strategy):
     # print(f"Responsibilities: {strategy.get_responsibilities(soup)[:100]}...")
     # print(f"Requirements: {strategy.get_requirements(soup)[:100]}...")
 
-if __name__ == "__main__":
-    links_dir = "links" # TODO update path
-    strategy = JustJoinItStrategy() # TODO configure strategy
 
-    
+if __name__ == "__main__":
+    links_dir = "offers"
+    strategy = JustJoinItStrategy()  # Configure based on need
+
     with open("logs/verification_results.txt", "w", encoding="utf-8") as out:
         for filename in os.listdir(links_dir):
             if filename.endswith(".htm"):

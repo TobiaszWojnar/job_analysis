@@ -1,5 +1,5 @@
 from typing import Literal
-from ..scraping.llm_scraper import get_property_with_llm
+from ..scraping.llm.llm_scraper import get_property_with_llm
 
 JobCategory = Literal[
     'Data',

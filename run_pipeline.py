@@ -79,7 +79,7 @@ def check_model_exists(model_name):
 def main():
     parser = argparse.ArgumentParser(
         description="Run Ollama, verify model presence, and process new job links.",
-        add_help=False # Let's handle help ourselves to forward remaining arguments to process_new.py
+        add_help=False
     )
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model to verify (default: {DEFAULT_MODEL})")
     
@@ -93,7 +93,7 @@ def main():
         print(f"  --model MODEL      Ollama model to verify (default: {DEFAULT_MODEL})")
         print("\nprocess_new.py Arguments:")
         # Try running process_new.py with --help to show its usage
-        subprocess.run([sys.executable, "process_new.py", "--help"])
+        subprocess.run([sys.executable, os.path.join("src", "scraping", "process_new.py"), "--help"])
         sys.exit(0)
 
     # 1. Check if Ollama is running, start it if not
@@ -136,7 +136,7 @@ def main():
 
     # 3. Run process_new.py
     print("\n--- Running process_new.py ---")
-    cmd = [sys.executable, "process_new.py"] + process_new_args
+    cmd = [sys.executable, os.path.join("src", "scraping", "process_new.py")] + process_new_args
     try:
         result = subprocess.run(cmd)
         sys.exit(result.returncode)

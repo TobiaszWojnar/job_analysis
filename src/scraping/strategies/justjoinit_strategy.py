@@ -8,7 +8,7 @@ from .strategy_helper import (
     get_years_of_experience_helper,
 )
 from ...utils.category_utils import get_category_helper
-from ..llm_scraper import (
+from ..llm.llm_scraper import (
     get_responsibilities_with_llm,
     get_requirements_with_llm,
     get_benefits_with_llm,

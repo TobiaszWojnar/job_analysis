@@ -100,11 +100,3 @@ def get_location_type_with_llm(page_text: str) -> str:
     list_of_options = "office, remote, hybrid"
 
     return get_property_with_llm(page_text, property_name, list_of_options)
-
-def get_location_type_with_llm(page_text: str) -> str:
-    """Extracts job location type using a local LLM via Ollama."""
-
-    property_name = "the location type (office, remote, hybrid)"
-    list_of_options = "office, remote, hybrid"
-
-    return get_property_with_llm(page_text, property_name, list_of_options)

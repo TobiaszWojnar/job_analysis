@@ -2,7 +2,7 @@ import argparse
 import sys
 import logging
 from src.scraping.scrape_job import scrape_job_page
-from src.links_cleaner import clean_links
+from src.utils.links_cleaner import clean_links
 from src.db.modify_db import save_to_postgres
 from src.db.read_db import get_existing_links
 
