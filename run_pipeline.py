@@ -8,6 +8,7 @@ import psycopg2
 from dotenv import load_dotenv
 from src.db.init_db import create_database, create_table
 from src.ollama import ensure_ollama_ready
+from src.queue.setup_rabbitmq import ensure_rabbitmq_ready
 
 # Force all print statements to flush immediately, preventing log buffering issues with subprocesses
 def print(*args, **kwargs):
@@ -32,7 +33,7 @@ def main():
     project_root = os.path.abspath(os.path.dirname(__file__))
     env["PYTHONPATH"] = project_root + os.pathsep + env.get("PYTHONPATH", "")
 
-    total_steps = 4
+    total_steps = 5
 
     # === STEP 1: Verify PostgreSQL Connection & Database Schema ===
     print(f"[Step 1/{total_steps}] Verifying PostgreSQL connection and database schema...")
@@ -60,8 +61,17 @@ def main():
         print(f"\nError: Ollama LLM support verification failed: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # === STEP 3: Publish Links ===
-    print(f"\n[Step 3/{total_steps}] Publishing links from new.txt to RabbitMQ...")
+    # === STEP 3: Verify RabbitMQ & Docker Support ===
+    print(f"\n[Step 3/{total_steps}] Verifying RabbitMQ support (Docker)...")
+    try:
+        ensure_rabbitmq_ready()
+        print("  -> RabbitMQ support verified successfully.")
+    except Exception as e:
+        print(f"\nError: RabbitMQ support verification failed: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # === STEP 4: Publish Links ===
+    print(f"\n[Step 4/{total_steps}] Publishing links from new.txt to RabbitMQ...")
     cmd_publish = [sys.executable, os.path.join("src", "queue", "publish.py")]
     try:
         result = subprocess.run(cmd_publish, env=env)
@@ -72,10 +82,10 @@ def main():
         print(f"\nError running publisher: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # === STEP 4: Start Consumer Workers ===
+    # === STEP 5: Start Consumer Workers ===
     workers_count = args.workers
     if workers_count > 1:
-        print(f"\n[Step 4/{total_steps}] Starting {workers_count} parallel consumer workers...")
+        print(f"\n[Step 5/{total_steps}] Starting {workers_count} parallel consumer workers...")
         processes = []
         for i in range(workers_count):
             p = subprocess.Popen([sys.executable, os.path.join("src", "queue", "worker.py")], env=env)
@@ -94,7 +104,7 @@ def main():
             print("All workers stopped.")
             sys.exit(0)
     else:
-        print(f"\n[Step 4/{total_steps}] Starting a single consumer worker...")
+        print(f"\n[Step 5/{total_steps}] Starting a single consumer worker...")
         cmd_worker = [sys.executable, os.path.join("src", "queue", "worker.py")]
         try:
             result = subprocess.run(cmd_worker, env=env)

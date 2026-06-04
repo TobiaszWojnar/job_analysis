@@ -110,7 +110,10 @@ def main():
         connection.close()
 
     except Exception as e:
-        print(f"Error publishing to RabbitMQ: {e}", file=sys.stderr)
+        error_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
+        print(f"Error publishing to RabbitMQ: {error_msg}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 if __name__ == "__main__":
