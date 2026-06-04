@@ -4,20 +4,16 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import cloudscraper
 
-from src.scraping.strategies.base_strategy import BaseJobStrategy
-from src.scraping.strategies.pracuj_strategy import PracujStrategy
-from src.scraping.strategies.nofluff_strategy import NoFluffStrategy
-from src.scraping.strategies.protocol_strategy import ProtocolStrategy
-from src.scraping.strategies.justjoinit_strategy import JustJoinItStrategy
+from src.scraping.strategies import (
+    BaseJobStrategy,
+    PracujStrategy,
+    NoFluffStrategy,
+    ProtocolStrategy,
+    JustJoinItStrategy
+)
 
-# # Uncomment when running this file as main for debugging purposes
-
-# from strategies.base_strategy import BaseJobStrategy
-# from strategies.pracuj_strategy import PracujStrategy
-# from strategies.nofluff_strategy import NoFluffStrategy
-# from strategies.protocol_strategy import ProtocolStrategy
-
-
+# Uncomment when running this file as main for debugging purposes
+# from strategies import BaseJobStrategy, PracujStrategy, NoFluffStrategy, ProtocolStrategy, JustJoinItStrategy
 
 def scrape_job_page(url: str) -> dict:
     HEADERS = {
@@ -70,26 +66,29 @@ def scrape_job_page(url: str) -> dict:
         'years_of_experience_normalized': strategy.get_years_of_experience_normalized(soup)
     }
 
+STRATEGIES = {
+    "pracuj.pl": PracujStrategy,
+    "nofluffjobs.com": NoFluffStrategy,
+    "theprotocol.it": ProtocolStrategy,
+    "justjoin.it": JustJoinItStrategy,
+}
+
 def get_strategy(url: str) -> BaseJobStrategy:
-    if "pracuj.pl" in url:
-        return PracujStrategy()
-    if "nofluffjobs.com" in url:
-        return NoFluffStrategy()
-    if "theprotocol.it" in url:
-        return ProtocolStrategy()
-    if "justjoin.it" in url:
-        return JustJoinItStrategy()
-    
-    # Default fallback or raise error
+    for domain, strategy_class in STRATEGIES.items():
+        if domain in url:
+            return strategy_class()
+
     raise ValueError(f"No strategy found for URL: {url}")
 
+# ---------------- Method for testing and debug purposes ----------------
+
 if __name__ == "__main__":
+    url = "https://example.com/jobs/job-link/"
+
     # if len(sys.argv) != 2:
     #     print(f"Usage: python {sys.argv[0]} <url>")
     #     sys.exit(1)
     # url = sys.argv[1]
-
-    url = "https://nofluffjobs.com/pl/job/php-laravel-developer-cstore-remote"
 
     try:
         result = scrape_job_page(url)

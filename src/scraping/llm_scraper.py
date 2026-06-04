@@ -1,4 +1,10 @@
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:12b")
 
 
 
@@ -19,7 +25,7 @@ def get_property_list_with_llm(
             f"Job offer text:\n{page_text}"
         )
 
-        payload = {"model": "gemma3:12b", "prompt": prompt, "stream": False}
+        payload = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": False}
 
         response = requests.post(
             "http://localhost:11434/api/generate", json=payload, timeout=60
@@ -50,7 +56,7 @@ def get_property_with_llm(
             f"Job offer text:\n{page_text}"
         )
 
-        payload = {"model": "gemma3:12b", "prompt": prompt, "stream": False}
+        payload = {"model": OLLAMA_MODEL, "prompt": prompt, "stream": False}
 
         response = requests.post(
             "http://localhost:11434/api/generate", json=payload, timeout=60

@@ -10,7 +10,6 @@ from .strategy_helper import (
 )
 
 
-
 class PracujStrategy(BaseJobStrategy):
     def get_title(self, soup: BeautifulSoup) -> str:
         title = get_text_helper(
@@ -104,7 +103,7 @@ class PracujStrategy(BaseJobStrategy):
 
         trainings_section = soup.find(attrs={"data-test": "section-training-space"})
         trainings = trainings_section.find_all("li") if trainings_section else []
-        return ", ".join(get_text_helper(benefit) for benefit in benefits + offered)
+        return ", ".join(get_text_helper(benefit) for benefit in benefits + offered + trainings)
 
     def get_full_offer(self, soup: BeautifulSoup) -> str:
         return get_text_helper(soup.find(id="offer-details").find("div"))

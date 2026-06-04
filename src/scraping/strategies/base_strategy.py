@@ -65,7 +65,6 @@ class BaseJobStrategy(ABC):
     def get_full_offer(self, soup: BeautifulSoup) -> str:
         pass
 
-#TODO confirm that that works
     def get_salary_min_normalized(self, soup: BeautifulSoup) -> int | None:
         """Calculate normalized minimum salary from parsed salary data."""
         salary = self.get_salary(soup)

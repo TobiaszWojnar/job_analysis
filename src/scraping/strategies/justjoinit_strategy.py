@@ -98,15 +98,9 @@ class JustJoinItStrategy(BaseJobStrategy):
                     return text
         return ""
 
-    def get_location_type(self, soup: BeautifulSoup) -> str:  # TODO improve
+    def get_location_type(self, soup: BeautifulSoup) -> str:
         text = soup.get_text().lower()
-
         return get_location_type_with_llm(text)
-        # if "remote" in text or "zdalna" in text:
-        #     return "remote"
-        # if "hybrid" in text or "hybrydowa" in text:
-        #     return "hybrid"
-        # return "office"
 
     def get_salary(self, soup: BeautifulSoup) -> str:
         salary_node = soup.find(

@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-import re
 from .base_strategy import BaseJobStrategy
 from .strategy_helper import get_salary_type_helper, get_text_helper, get_years_of_experience_helper, get_salary_helper
 from ...utils.category_utils import get_category_helper
