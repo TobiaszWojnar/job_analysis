@@ -86,45 +86,42 @@ The following fields are stored in the database for each job listing:
 ## Scripts Usage
 
 ### 1. Data Collection
-   Once everything works paste links to `links/new.txt` and run
-   ```bash
-   python process_new.py
-   ```
-   That will perform following steps:
-   - initialize database
-   - clean links
-   - add to queue 
-   - scrape jobs TODO clear new.txt after processing
-   - normalize data - years of experience, salary to PLN, monthly, nett value, tech stack
-   - save to database
+To process new job links, add them to `links/new.txt` (one URL per line) and run:
+```bash
+python run_pipeline.py
+```
+This launcher script runs sequentially in three main stages:
+1. **[Step 1/3] Database Schema & Connection Verification**: Creates the PostgreSQL database and `job_offers` table if they do not exist, and runs an active connection test (failing fast if PostgreSQL is down).
+2. **[Step 2/3] LLM Support Verification (Ollama)**: Verifies that the Ollama server is up and running locally (starting it if it is not), and confirms that the model configured in `.env` (`OLLAMA_MODEL`) is pulled and ready.
+3. **[Step 3/3] Link Processing**: Executes the `src/scraping/process_new.py` scraper pipeline to clean and process URLs.
+
+During execution, `process_new.py` performs the following steps:
+- Cleans links by removing parameters and duplicates.
+- Excludes links already present in the database.
+- Scrapes each page and normalizes data (e.g. converting salaries to PLN, normalizing years of experience, extracting tech stacks).
+- Saves results to the PostgreSQL database.
+- Clears `links/new.txt` once finished.
 
 #### 1.1 Initialize Database
-Sets up the PostgreSQL database and `job_offers` table.
+Sets up the PostgreSQL database and `job_offers` table:
 ```bash
-python init_db.py
+python src/db/init_db.py
 ```
 
 #### 1.2 Clean Links
-Removes duplicates and cleans URL parameters from a list of links.
+Removes duplicates and query parameters from a list of links:
 ```bash
-python links-cleener.py input_file.txt [output_file.txt]
+python src/utils/links_cleaner.py input_file.txt [output_file.txt]
 ```
 
 #### 1.3 Scrape a Single Job
-Scrapes a job page and prints the data to the console (JSON format). #TODO add tests for helpers
-
+Scrapes a single job page and prints the extracted data to the console in JSON format:
 ```bash
-python scrape_job.py <url>
-```
-
-#### 1.4 Save Job to Database
-Scrapes a job page and saves it to the `job_offers` table.
-```bash
-python save_to_db.py <url>
+python src/scraping/scrape_job.py <url>
 ```
 
 ### 2. Reporting
-Prints the titles of all jobs currently in the database.
+Prints the titles of all jobs currently in the database:
 ```bash
 python reporting.py
 ```
@@ -137,20 +134,21 @@ python reporting.py
 2. **Run the cleaner script**
    - Open a terminal in the project directory.
    - To clean a file in-place:
-     ```
-     python links-cleener.py nofluff.txt
+     ```bash
+     python src/utils/links_cleaner.py nofluff.txt
      ```
    - To clean and write to a new file:
-     ```
-     python links-cleener.py nofluff.txt cleaned_nofluff.txt
+     ```bash
+     python src/utils/links_cleaner.py nofluff.txt cleaned_nofluff.txt
      ```
 
 3. **Result**
-   - The output file will contain unique links with postfixes removed.
+   - The output file will contain unique links with query postfixes and parameters removed.
 
 
 
 **TODO**
+- add queue mechanizm for async processing links from new.txt
 - add support to use db schema in queries
 - Catogerize technology tags
 - Schetch up UI for reporting

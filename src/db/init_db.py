@@ -83,10 +83,23 @@ def create_table():
         );
         """
 
-        print(f"Creating table 'job_offers' in '{DB_NAME}'...")
-        cur.execute(create_table_query)
-        conn.commit()
-        print("Table 'job_offers' created/verified successfully.")
+        # Check if table exists
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'job_offers'
+            );
+        """)
+        table_exists = cur.fetchone()[0]
+
+        if not table_exists:
+            print(f"Creating table 'job_offers' in '{DB_NAME}'...")
+            cur.execute(create_table_query)
+            conn.commit()
+            print("Table 'job_offers' created successfully.")
+        else:
+            print(f"Table 'job_offers' already exists in '{DB_NAME}'.")
 
         cur.close()
         conn.close()
