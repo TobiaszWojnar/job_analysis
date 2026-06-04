@@ -150,8 +150,8 @@ python reporting.py
 
 
 **TODO**
-- add support to use db schema in queries
-- Catogerize technology tags
+- add support to use db schema in queries like types
+- Catogerize technology tags - for agent get all tags and try to categorize them for frondend, backend, db, devops, ai, qa, security, mobile, other
 - Schetch up UI for reporting
-- Add subcategories
+- Add subcategories, like fronted in  react
 - Reporting and analytics (graphs, word clouds, salary stats, tech tags per category)
