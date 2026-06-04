@@ -1,0 +1,117 @@
+#!/usr/bin/env python3
+import os
+import sys
+import pika
+from dotenv import load_dotenv
+
+# Add project root to sys.path to support running this file directly from anywhere
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.utils.links_cleaner import clean_links
+from src.db.read_db import get_existing_links
+
+def main():
+    load_dotenv()
+
+    # Paths
+    links_file = os.path.join("links", "new.txt")
+    
+    if not os.path.exists(links_file):
+        print(f"Error: {links_file} not found.")
+        sys.exit(1)
+
+    # 1. Read and clean links from new.txt
+    print("Reading and cleaning links from new.txt...")
+    try:
+        with open(links_file, "r", encoding="utf-8") as f:
+            urls = clean_links(f)
+    except Exception as e:
+        print(f"Error reading links: {e}")
+        sys.exit(1)
+
+    if not urls:
+        print("No URLs found to process in new.txt.")
+        sys.exit(0)
+
+    print(f"Cleaned links. Total unique URLs: {len(urls)}")
+
+    # 2. Filter out duplicates existing in PostgreSQL
+    print("Checking PostgreSQL for already scraped job links...")
+    try:
+        existing_urls = get_existing_links(urls)
+        new_urls = [url for url in urls if url not in existing_urls]
+    except Exception as e:
+        print(f"Error checking PostgreSQL database: {e}")
+        sys.exit(1)
+
+    duplicates_count = len(urls) - len(new_urls)
+    if duplicates_count > 0:
+        print(f"Found {duplicates_count} links that are already present in the database. Skipping them.")
+
+    if not new_urls:
+        print("No new links left to publish. Clearing new.txt.")
+        # Clear the input file since all were duplicates
+        with open(links_file, "w", encoding="utf-8"):
+            pass
+        sys.exit(0)
+
+    # 3. Publish to RabbitMQ
+    rabbitmq_host = os.getenv("RABBITMQ_HOST", "localhost")
+    rabbitmq_port = int(os.getenv("RABBITMQ_PORT", 5672))
+    rabbitmq_user = os.getenv("RABBITMQ_USER", "guest")
+    rabbitmq_password = os.getenv("RABBITMQ_PASSWORD", "guest")
+    rabbitmq_queue = os.getenv("RABBITMQ_QUEUE", "job_links")
+
+    print(f"Connecting to RabbitMQ at {rabbitmq_host}:{rabbitmq_port}...")
+    try:
+        credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_password)
+        parameters = pika.ConnectionParameters(
+            host=rabbitmq_host,
+            port=rabbitmq_port,
+            credentials=credentials,
+            connection_attempts=3,
+            retry_delay=2
+        )
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+
+        rabbitmq_dlq = os.getenv("RABBITMQ_DLQ", "job_links_failed")
+        dlx_exchange = "job_links_dlx"
+        channel.exchange_declare(exchange=dlx_exchange, exchange_type="direct")
+        
+        arguments = {
+            "x-dead-letter-exchange": dlx_exchange,
+            "x-dead-letter-routing-key": rabbitmq_dlq
+        }
+        # Declare the primary queue as durable with DLX arguments
+        channel.queue_declare(queue=rabbitmq_queue, durable=True, arguments=arguments)
+
+        print(f"Publishing {len(new_urls)} URLs to queue '{rabbitmq_queue}'...")
+        published_count = 0
+        for url in new_urls:
+            channel.basic_publish(
+                exchange="",
+                routing_key=rabbitmq_queue,
+                body=url,
+                properties=pika.BasicProperties(
+                    delivery_mode=2,  # Make message persistent on disk
+                )
+            )
+            published_count += 1
+
+        print(f"Successfully published {published_count} messages to RabbitMQ.")
+        
+        # Clear new.txt on success
+        with open(links_file, "w", encoding="utf-8"):
+            pass
+        print("Cleared new.txt successfully.")
+
+        connection.close()
+
+    except Exception as e:
+        print(f"Error publishing to RabbitMQ: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

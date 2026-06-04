@@ -90,17 +90,19 @@ To process new job links, add them to `links/new.txt` (one URL per line) and run
 ```bash
 python run_pipeline.py
 ```
-This launcher script runs sequentially in three main stages:
-1. **[Step 1/3] Database Schema & Connection Verification**: Creates the PostgreSQL database and `job_offers` table if they do not exist, and runs an active connection test (failing fast if PostgreSQL is down).
-2. **[Step 2/3] LLM Support Verification (Ollama)**: Verifies that the Ollama server is up and running locally (starting it if it is not), and confirms that the model configured in `.env` (`OLLAMA_MODEL`) is pulled and ready.
-3. **[Step 3/3] Link Processing**: Executes the `src/scraping/process_new.py` scraper pipeline to clean and process URLs.
 
-During execution, `process_new.py` performs the following steps:
-- Cleans links by removing parameters and duplicates.
-- Excludes links already present in the database.
-- Scrapes each page and normalizes data (e.g. converting salaries to PLN, normalizing years of experience, extracting tech stacks).
-- Saves results to the PostgreSQL database.
-- Clears `links/new.txt` once finished.
+This launcher script executes the following four stages:
+1. **[Step 1/4] Database Schema & Connection Verification**: Creates the PostgreSQL database and `job_offers` table if they do not exist, and runs an active connection test.
+2. **[Step 2/4] LLM Support Verification (Ollama)**: Verifies that the Ollama server is up and running locally, and confirms that the model configured in `.env` (`OLLAMA_MODEL`) is pulled and ready.
+3. **[Step 3/4] Publishing Links**: Reads and cleans URLs from `links/new.txt`, queries PostgreSQL to skip any already-processed URLs, and publishes new URLs to the RabbitMQ queue (`job_links`). It then clears `links/new.txt`.
+4. **[Step 4/4] Starting Consumer Worker(s)**: 
+   - By default (or with `--workers 1`), it starts a single consumer worker in the foreground.
+   - If `--workers N` is specified (where $N > 1$), it spawns $N$ consumer workers in the background as separate processes to process job links in parallel.
+
+To run with multiple workers, use:
+```bash
+python run_pipeline.py --workers 2
+```
 
 #### 1.1 Initialize Database
 Sets up the PostgreSQL database and `job_offers` table:
@@ -148,7 +150,6 @@ python reporting.py
 
 
 **TODO**
-- add queue mechanizm for async processing links from new.txt
 - add support to use db schema in queries
 - Catogerize technology tags
 - Schetch up UI for reporting

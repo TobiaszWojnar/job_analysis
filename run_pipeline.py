@@ -20,31 +20,22 @@ DEFAULT_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:12b")
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run Ollama, verify model presence, and process new job links.",
-        add_help=False
+        description="Run RabbitMQ publisher and consumer workers, verifying database and Ollama setup."
     )
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model to verify (default: {DEFAULT_MODEL})")
+    parser.add_argument("--workers", type=int, default=1, help="Number of parallel worker processes to start (default: 1). Only use if you want more than one worker.")
     
-    # Parse only known args to allow forwarding everything else to process_new.py
-    args, process_new_args = parser.parse_known_args()
+    args = parser.parse_args()
     
     # Prepare environment with PYTHONPATH set to project root to allow imports under 'src'
     env = os.environ.copy()
     project_root = os.path.abspath(os.path.dirname(__file__))
     env["PYTHONPATH"] = project_root + os.pathsep + env.get("PYTHONPATH", "")
 
-    # If the user passed -h or --help, print this script's help first, then process_new.py help
-    if "-h" in process_new_args or "--help" in process_new_args:
-        print("Usage: python run_pipeline.py [--model MODEL] [process_new.py arguments...]\n")
-        print("Launcher Arguments:")
-        print(f"  --model MODEL      Ollama model to verify (default: {DEFAULT_MODEL})")
-        print("\nprocess_new.py Arguments:")
-        # Try running process_new.py with --help to show its usage
-        subprocess.run([sys.executable, os.path.join("src", "scraping", "process_new.py"), "--help"], env=env)
-        sys.exit(0)
+    total_steps = 4
 
     # === STEP 1: Verify PostgreSQL Connection & Database Schema ===
-    print("[Step 1/3] Verifying PostgreSQL connection and database schema...")
+    print(f"[Step 1/{total_steps}] Verifying PostgreSQL connection and database schema...")
     try:
         # Create database and tables if they don't exist
         create_database()
@@ -61,7 +52,7 @@ def main():
         sys.exit(1)
 
     # === STEP 2: Verify Ollama & LLM Support ===
-    print("\n[Step 2/3] Verifying LLM support (Ollama)...")
+    print(f"\n[Step 2/{total_steps}] Verifying LLM support (Ollama)...")
     try:
         ensure_ollama_ready(args.model)
         print("  -> Ollama LLM support verified successfully.")
@@ -69,15 +60,48 @@ def main():
         print(f"\nError: Ollama LLM support verification failed: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # === STEP 3: Start Processing Job Links ===
-    print("\n[Step 3/3] Starting job links scraping and processing...")
-    cmd = [sys.executable, os.path.join("src", "scraping", "process_new.py")] + process_new_args
+    # === STEP 3: Publish Links ===
+    print(f"\n[Step 3/{total_steps}] Publishing links from new.txt to RabbitMQ...")
+    cmd_publish = [sys.executable, os.path.join("src", "queue", "publish.py")]
     try:
-        result = subprocess.run(cmd, env=env)
-        sys.exit(result.returncode)
+        result = subprocess.run(cmd_publish, env=env)
+        if result.returncode != 0:
+            print(f"\nError: Publishing links failed with return code {result.returncode}.", file=sys.stderr)
+            sys.exit(result.returncode)
     except Exception as e:
-        print(f"Error running process_new.py: {e}", file=sys.stderr)
+        print(f"\nError running publisher: {e}", file=sys.stderr)
         sys.exit(1)
+
+    # === STEP 4: Start Consumer Workers ===
+    workers_count = args.workers
+    if workers_count > 1:
+        print(f"\n[Step 4/{total_steps}] Starting {workers_count} parallel consumer workers...")
+        processes = []
+        for i in range(workers_count):
+            p = subprocess.Popen([sys.executable, os.path.join("src", "queue", "worker.py")], env=env)
+            processes.append(p)
+        print(f"  -> Successfully started {workers_count} parallel background workers.")
+        try:
+            # Block and wait for all workers
+            for p in processes:
+                p.wait()
+        except KeyboardInterrupt:
+            print("\nShutting down all workers...")
+            for p in processes:
+                p.terminate()
+            for p in processes:
+                p.wait()
+            print("All workers stopped.")
+            sys.exit(0)
+    else:
+        print(f"\n[Step 4/{total_steps}] Starting a single consumer worker...")
+        cmd_worker = [sys.executable, os.path.join("src", "queue", "worker.py")]
+        try:
+            result = subprocess.run(cmd_worker, env=env)
+            sys.exit(result.returncode)
+        except KeyboardInterrupt:
+            print("\nWorker stopped.")
+            sys.exit(0)
 
 if __name__ == "__main__":
     main()
