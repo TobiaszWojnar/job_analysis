@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-import re
 from .base_strategy import BaseJobStrategy
 from ...utils.category_utils import get_category_helper
 from .strategy_helper import (
