@@ -88,7 +88,10 @@ def main():
         print(f"\n[Step 5/{total_steps}] Starting {workers_count} parallel consumer workers...")
         processes = []
         for i in range(workers_count):
-            p = subprocess.Popen([sys.executable, os.path.join("src", "queue", "worker.py")], env=env)
+            p = subprocess.Popen(
+                [sys.executable, os.path.join("src", "queue", "worker.py"), "--id", str(i + 1)],
+                env=env
+            )
             processes.append(p)
         print(f"  -> Successfully started {workers_count} parallel background workers.")
         try:
@@ -105,7 +108,7 @@ def main():
             sys.exit(0)
     else:
         print(f"\n[Step 5/{total_steps}] Starting a single consumer worker...")
-        cmd_worker = [sys.executable, os.path.join("src", "queue", "worker.py")]
+        cmd_worker = [sys.executable, os.path.join("src", "queue", "worker.py"), "--id", "1"]
         try:
             result = subprocess.run(cmd_worker, env=env)
             sys.exit(result.returncode)

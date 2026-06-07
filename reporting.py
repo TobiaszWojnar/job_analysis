@@ -1,3 +1,4 @@
+from src.db.modify_db import normalize_salary
 from src.db.read_db import get_columns
 import pandas as pd
 

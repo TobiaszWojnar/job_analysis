@@ -3,6 +3,7 @@ import os
 import sys
 import pika
 import logging
+import time
 from dotenv import load_dotenv
 
 # Add project root to sys.path to support running this file directly from anywhere
@@ -13,39 +14,20 @@ from src.scraping.scrape_job import scrape_job_page
 from src.db.modify_db import save_to_postgres
 from src.db.read_db import get_existing_links
 
-def callback(ch, method, properties, body):
-    url = body.decode("utf-8").strip()
-    logging.info(f"Received URL from queue: {url}")
-
-    # Double check database to prevent duplicate scraping (Race Condition prevention)
-    try:
-        if get_existing_links([url]):
-            logging.info(f"  -> Link already exists in DB. Skipping scraping: {url}")
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            return
-    except Exception as e:
-        logging.error(f"  -> Error checking DB for duplicates for URL {url}: {e}")
-        # Requeue for retry later since DB might be temporarily unavailable
-        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
-        return
-
-    # Process the job scraping and saving
-    try:
-        data = scrape_job_page(url)
-        save_to_postgres(data)
-        logging.info("  -> Successfully processed and saved to DB.")
-        # Acknowledge the message upon success
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-    except Exception as e:
-        logging.error(f"  -> Error processing URL {url}: {e}")
-        
-        # Dead-Letter routing: basic_nack with requeue=False will automatically
-        # send this message to the configured Dead-Letter Queue (DLQ)
-        logging.info("  -> Routing URL to Dead-Letter Queue (DLQ) for manual review.")
-        ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
-
 def main():
     load_dotenv()
+
+    # Parse arguments for worker ID
+    import argparse
+    parser = argparse.ArgumentParser(description="RabbitMQ Job Consumer Worker")
+    parser.add_argument("--id", type=int, default=None, help="Optional worker ID for logging")
+    args = parser.parse_args()
+
+    worker_prefix = f"Worker {args.id} " if args.id is not None else "Worker "
+
+    # Ensure Docker and RabbitMQ are running
+    from src.queue.setup_rabbitmq import ensure_rabbitmq_ready
+    ensure_rabbitmq_ready()
 
     # Configure logging
     log_dir = "logs"
@@ -54,11 +36,11 @@ def main():
     # Specific error handler file logging
     error_handler = logging.FileHandler(os.path.join(log_dir, "worker_errors.log"))
     error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    error_handler.setFormatter(logging.Formatter(f'%(asctime)s - %(levelname)s - {worker_prefix}%(message)s'))
 
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
+        format=f'%(asctime)s - %(levelname)s - {worker_prefix}%(message)s',
         handlers=[
             logging.FileHandler(os.path.join(log_dir, "worker.log")),
             logging.StreamHandler(sys.stdout),
@@ -104,12 +86,49 @@ def main():
         # 4. Set Quality of Service (prefetch=1) for fair dispatch among concurrent workers
         channel.basic_qos(prefetch_count=1)
 
-        # 5. Start consuming
-        channel.basic_consume(queue=rabbitmq_queue, on_message_callback=callback)
-
         logging.info(f"Worker daemon started. Listening for messages on '{rabbitmq_queue}'...")
         logging.info("To exit press CTRL+C")
-        channel.start_consuming()
+
+        was_empty = False
+        while True:
+            # Process any network/event loop callbacks (needed for keepalives)
+            connection.process_data_events()
+            
+            method_frame, header_frame, body = channel.basic_get(queue=rabbitmq_queue)
+            if method_frame:
+                was_empty = False
+                url = body.decode("utf-8").strip()
+                logging.info(f"Worker took URL from queue: {url}")
+                
+                # Double check database to prevent duplicate scraping (Race Condition prevention)
+                try:
+                    if get_existing_links([url]):
+                        logging.info(f"  -> Link already exists in DB. Skipping scraping: {url}")
+                        channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+                        logging.info(f"Worker finished processing: {url}")
+                        continue
+                except Exception as e:
+                    logging.error(f"  -> Error checking DB for duplicates for URL {url}: {e}")
+                    channel.basic_nack(delivery_tag=method_frame.delivery_tag, requeue=True)
+                    continue
+
+                # Process the job scraping and saving
+                try:
+                    data = scrape_job_page(url)
+                    save_to_postgres(data)
+                    logging.info("  -> Successfully processed and saved to DB.")
+                    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+                    logging.info(f"Worker finished processing: {url}")
+                except Exception as e:
+                    logging.error(f"  -> Error processing URL {url}: {e}")
+                    logging.info("  -> Routing URL to Dead-Letter Queue (DLQ) for manual review.")
+                    channel.basic_nack(delivery_tag=method_frame.delivery_tag, requeue=False)
+                    logging.info(f"Worker finished processing (with error): {url}")
+            else:
+                if not was_empty:
+                    logging.info("Worker has nothing to take from queue. Waiting for new messages...")
+                    was_empty = True
+                time.sleep(2)
 
     except KeyboardInterrupt:
         logging.info("Shutting down worker daemon...")

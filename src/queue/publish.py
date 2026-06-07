@@ -14,6 +14,10 @@ from src.db.read_db import get_existing_links
 def main():
     load_dotenv()
 
+    # Ensure Docker and RabbitMQ are running
+    from src.queue.setup_rabbitmq import ensure_rabbitmq_ready
+    ensure_rabbitmq_ready()
+
     # Paths
     links_file = os.path.join("links", "new.txt")
     

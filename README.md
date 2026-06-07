@@ -150,6 +150,7 @@ python reporting.py
 
 
 **TODO**
+- add support to publiser to monitor file and if somethig gets written down there than publish to the queue
 - add support to use db schema in queries like types
 - Catogerize technology tags - for agent get all tags and try to categorize them for frondend, backend, db, devops, ai, qa, security, mobile, other
 - Schetch up UI for reporting
