@@ -150,8 +150,10 @@ python reporting.py
 
 
 **TODO**
-- add support to publiser to monitor file and if somethig gets written down there than publish to the queue
-- add support to use db schema in queries like types
+- enhance logs of workers to know how ,much is still in queue
+- investigate how long everything is waking up can we make it paralel (db, rabbitmq, ollama)
+- investigate that last time workers seemed not to wake up
+- add support to use db schema in queries like types, for safety
 - Catogerize technology tags - for agent get all tags and try to categorize them for frondend, backend, db, devops, ai, qa, security, mobile, other
 - Schetch up UI for reporting
 - Add subcategories, like fronted in  react

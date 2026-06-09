@@ -11,34 +11,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from src.utils.links_cleaner import clean_links
 from src.db.read_db import get_existing_links
 
-def main():
-    load_dotenv()
-
-    # Ensure Docker and RabbitMQ are running
-    from src.queue.setup_rabbitmq import ensure_rabbitmq_ready
-    ensure_rabbitmq_ready()
-
-    # Paths
-    links_file = os.path.join("links", "new.txt")
-    
-    if not os.path.exists(links_file):
-        print(f"Error: {links_file} not found.")
-        sys.exit(1)
-
+def publish_once(links_file):
     # 1. Read and clean links from new.txt
-    print("Reading and cleaning links from new.txt...")
+    if not os.path.exists(links_file) or os.path.getsize(links_file) == 0:
+        return False
+
     try:
         with open(links_file, "r", encoding="utf-8") as f:
             urls = clean_links(f)
     except Exception as e:
         print(f"Error reading links: {e}")
-        sys.exit(1)
+        return False
 
     if not urls:
-        print("No URLs found to process in new.txt.")
-        sys.exit(0)
+        # Clear the file since it has no valid links
+        try:
+            with open(links_file, "w", encoding="utf-8"):
+                pass
+        except Exception as e:
+            print(f"Error clearing empty links file: {e}")
+        return True
 
-    print(f"Cleaned links. Total unique URLs: {len(urls)}")
+    print(f"New links detected. Cleaned links. Total unique URLs: {len(urls)}")
 
     # 2. Filter out duplicates existing in PostgreSQL
     print("Checking PostgreSQL for already scraped job links...")
@@ -47,7 +41,7 @@ def main():
         new_urls = [url for url in urls if url not in existing_urls]
     except Exception as e:
         print(f"Error checking PostgreSQL database: {e}")
-        sys.exit(1)
+        return False
 
     duplicates_count = len(urls) - len(new_urls)
     if duplicates_count > 0:
@@ -56,9 +50,12 @@ def main():
     if not new_urls:
         print("No new links left to publish. Clearing new.txt.")
         # Clear the input file since all were duplicates
-        with open(links_file, "w", encoding="utf-8"):
-            pass
-        sys.exit(0)
+        try:
+            with open(links_file, "w", encoding="utf-8"):
+                pass
+        except Exception as e:
+            print(f"Error clearing links file: {e}")
+        return True
 
     # 3. Publish to RabbitMQ
     rabbitmq_host = os.getenv("RABBITMQ_HOST", "localhost")
@@ -112,13 +109,51 @@ def main():
         print("Cleared new.txt successfully.")
 
         connection.close()
+        return True
 
     except Exception as e:
         error_msg = f"{type(e).__name__}: {e}" if str(e) else type(e).__name__
         print(f"Error publishing to RabbitMQ: {error_msg}", file=sys.stderr)
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        return False
+
+def main():
+    load_dotenv()
+
+    import argparse
+    parser = argparse.ArgumentParser(description="Publish links to RabbitMQ queue")
+    parser.add_argument("--watch", "-w", action="store_true", help="Monitor the links file and publish new links as they are added")
+    args = parser.parse_args()
+
+    # Ensure Docker and RabbitMQ are running
+    from src.queue.setup_rabbitmq import ensure_rabbitmq_ready
+    ensure_rabbitmq_ready()
+
+    # Paths
+    links_file = os.path.join("links", "new.txt")
+    
+    # Ensure directories exist
+    os.makedirs(os.path.dirname(links_file), exist_ok=True)
+    if not os.path.exists(links_file):
+        with open(links_file, "w", encoding="utf-8"):
+            pass
+
+    if args.watch:
+        print(f"Publisher started in watch mode. Monitoring '{links_file}' for new links...")
+        print("To exit press CTRL+C")
+        import time
+        try:
+            while True:
+                publish_once(links_file)
+                time.sleep(2)
+        except KeyboardInterrupt:
+            print("\nPublisher watch stopped.")
+            sys.exit(0)
+    else:
+        success = publish_once(links_file)
+        if not success:
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

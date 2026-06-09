@@ -6,20 +6,27 @@ import requests
 import builtins
 from dotenv import load_dotenv
 
+
 # Force all print statements to flush immediately, preventing log buffering issues with subprocesses
 def print(*args, **kwargs):
-    kwargs.setdefault('flush', True)
+    kwargs.setdefault("flush", True)
     builtins.print(*args, **kwargs)
+
 
 load_dotenv()
 
 OLLAMA_API_URL = "http://localhost:11434"
 
+
 def get_ollama_command():
     """Finds the ollama executable command or path."""
     # Check if 'ollama' is in the system PATH
     try:
-        subprocess.run(["ollama", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ["ollama", "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
         return "ollama"
     except FileNotFoundError:
         pass
@@ -33,6 +40,7 @@ def get_ollama_command():
 
     return None
 
+
 def is_ollama_running():
     """Checks if Ollama server is responding to API requests."""
     try:
@@ -41,7 +49,8 @@ def is_ollama_running():
     except requests.RequestException:
         return False
 
-def wait_for_ollama(timeout=30):
+
+def wait_for_ollama(timeout=60):
     """Polls the Ollama API until it becomes available."""
     print("Waiting for Ollama to respond...", end="", flush=True)
     start_time = time.time()
@@ -73,6 +82,7 @@ def check_model_exists(model_name):
         print(f"\nWarning: Failed to retrieve model list from Ollama API: {e}")
     return False
 
+
 def ensure_ollama_ready(model_name):
     """Ensures Ollama is running and has the specified model pulled."""
     # 1. Check if Ollama is running, start it if not
@@ -81,17 +91,24 @@ def ensure_ollama_ready(model_name):
         print("Ollama is not running. Attempting to start it...")
         ollama_cmd = get_ollama_command()
         if not ollama_cmd:
-            print("Error: 'ollama' command not found in PATH or standard installation directory.", file=sys.stderr)
+            print(
+                "Error: 'ollama' command not found in PATH or standard installation directory.",
+                file=sys.stderr,
+            )
             print("Please make sure Ollama is installed and running.", file=sys.stderr)
             sys.exit(1)
-            
+
         try:
             # Launch ollama serve in the background
-            subprocess.Popen([ollama_cmd, "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen(
+                [ollama_cmd, "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         except Exception as e:
             print(f"Error starting Ollama: {e}", file=sys.stderr)
             sys.exit(1)
-        
+
         # Wait for Ollama to become available
         if not wait_for_ollama():
             sys.exit(1)

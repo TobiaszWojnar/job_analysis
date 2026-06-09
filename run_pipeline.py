@@ -25,6 +25,7 @@ def main():
     )
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Ollama model to verify (default: {DEFAULT_MODEL})")
     parser.add_argument("--workers", type=int, default=1, help="Number of parallel worker processes to start (default: 1). Only use if you want more than one worker.")
+    parser.add_argument("--watch", "-w", action="store_true", help="Start the publisher in watch mode (monitoring links/new.txt) in the background")
     
     args = parser.parse_args()
     
@@ -71,16 +72,27 @@ def main():
         sys.exit(1)
 
     # === STEP 4: Publish Links ===
-    print(f"\n[Step 4/{total_steps}] Publishing links from new.txt to RabbitMQ...")
-    cmd_publish = [sys.executable, os.path.join("src", "queue", "publish.py")]
-    try:
-        result = subprocess.run(cmd_publish, env=env)
-        if result.returncode != 0:
-            print(f"\nError: Publishing links failed with return code {result.returncode}.", file=sys.stderr)
-            sys.exit(result.returncode)
-    except Exception as e:
-        print(f"\nError running publisher: {e}", file=sys.stderr)
-        sys.exit(1)
+    publisher_process = None
+    if args.watch:
+        print(f"\n[Step 4/{total_steps}] Starting publisher in watch mode (background)...")
+        cmd_publish = [sys.executable, os.path.join("src", "queue", "publish.py"), "--watch"]
+        try:
+            publisher_process = subprocess.Popen(cmd_publish, env=env)
+            print("  -> Publisher successfully started in background.")
+        except Exception as e:
+            print(f"\nError starting publisher: {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        print(f"\n[Step 4/{total_steps}] Publishing links from new.txt to RabbitMQ...")
+        cmd_publish = [sys.executable, os.path.join("src", "queue", "publish.py")]
+        try:
+            result = subprocess.run(cmd_publish, env=env)
+            if result.returncode != 0:
+                print(f"\nError: Publishing links failed with return code {result.returncode}.", file=sys.stderr)
+                sys.exit(result.returncode)
+        except Exception as e:
+            print(f"\nError running publisher: {e}", file=sys.stderr)
+            sys.exit(1)
 
     # === STEP 5: Start Consumer Workers ===
     workers_count = args.workers
@@ -102,6 +114,10 @@ def main():
             print("\nShutting down all workers...")
             for p in processes:
                 p.terminate()
+            if publisher_process is not None:
+                print("Shutting down background publisher...")
+                publisher_process.terminate()
+                publisher_process.wait()
             for p in processes:
                 p.wait()
             print("All workers stopped.")
@@ -111,9 +127,16 @@ def main():
         cmd_worker = [sys.executable, os.path.join("src", "queue", "worker.py"), "--id", "1"]
         try:
             result = subprocess.run(cmd_worker, env=env)
+            if publisher_process is not None:
+                publisher_process.terminate()
+                publisher_process.wait()
             sys.exit(result.returncode)
         except KeyboardInterrupt:
             print("\nWorker stopped.")
+            if publisher_process is not None:
+                print("Shutting down background publisher...")
+                publisher_process.terminate()
+                publisher_process.wait()
             sys.exit(0)
 
 if __name__ == "__main__":
