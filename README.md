@@ -150,7 +150,6 @@ python reporting.py
 
 
 **TODO**
-- enhance logs of workers to know how ,much is still in queue
 - investigate how long everything is waking up can we make it paralel (db, rabbitmq, ollama)
 - investigate that last time workers seemed not to wake up
 - add support to use db schema in queries like types, for safety

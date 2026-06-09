@@ -98,7 +98,9 @@ def main():
             if method_frame:
                 was_empty = False
                 url = body.decode("utf-8").strip()
-                logging.info(f"Worker took URL from queue: {url}")
+                remaining = method_frame.message_count
+                remaining_str = f"{remaining} remaining in queue" if remaining is not None else "unknown count remaining"
+                logging.info(f"Worker took URL from queue: {url} ({remaining_str})")
                 
                 # Double check database to prevent duplicate scraping (Race Condition prevention)
                 try:
