@@ -65,7 +65,20 @@ def main():
             heartbeat=600,
             blocked_connection_timeout=300
         )
-        connection = pika.BlockingConnection(parameters)
+        
+        max_retries = 5
+        retry_delay = 5
+        connection = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                connection = pika.BlockingConnection(parameters)
+                break
+            except Exception as e:
+                if attempt == max_retries:
+                    raise
+                logging.warning(f"Connection attempt {attempt}/{max_retries} failed: {e}. Retrying in {retry_delay}s...")
+                time.sleep(retry_delay)
+
         channel = connection.channel()
 
         # 1. Declare the Dead-Letter Exchange (DLX)

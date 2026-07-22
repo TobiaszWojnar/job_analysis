@@ -50,7 +50,7 @@ def is_ollama_running():
         return False
 
 
-def wait_for_ollama(timeout=60):
+def wait_for_ollama(timeout=120):
     """Polls the Ollama API until it becomes available."""
     print("Waiting for Ollama to respond...", end="", flush=True)
     start_time = time.time()

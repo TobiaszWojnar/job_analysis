@@ -74,7 +74,21 @@ def publish_once(links_file):
             connection_attempts=3,
             retry_delay=2
         )
-        connection = pika.BlockingConnection(parameters)
+        
+        max_retries = 5
+        retry_delay = 5
+        connection = None
+        for attempt in range(1, max_retries + 1):
+            try:
+                connection = pika.BlockingConnection(parameters)
+                break
+            except Exception as e:
+                if attempt == max_retries:
+                    raise
+                print(f"Connection attempt {attempt}/{max_retries} failed: {e}. Retrying in {retry_delay}s...")
+                import time
+                time.sleep(retry_delay)
+
         channel = connection.channel()
 
         rabbitmq_dlq = os.getenv("RABBITMQ_DLQ", "job_links_failed")

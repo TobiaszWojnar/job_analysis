@@ -106,17 +106,27 @@ def create_rabbitmq_container():
         return False
 
 def wait_for_rabbitmq_port(host, port, timeout=45):
-    """Polls the RabbitMQ port until it starts accepting TCP connections."""
-    print(f"Waiting for RabbitMQ at {host}:{port} to accept connections...", end="", flush=True)
+    """Polls RabbitMQ until it is fully ready to accept AMQP connections."""
+    import pika
+    print(f"Waiting for RabbitMQ at {host}:{port} to be fully ready...", end="", flush=True)
+    rabbitmq_user = os.getenv("RABBITMQ_USER", "guest")
+    rabbitmq_password = os.getenv("RABBITMQ_PASSWORD", "guest")
+    credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_password)
+    parameters = pika.ConnectionParameters(
+        host=host,
+        port=port,
+        credentials=credentials,
+        connection_attempts=1,
+        retry_delay=1
+    )
     start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            with socket.create_connection((host, port), timeout=2):
-                print(" Connected!")
-                # Give it a tiny bit of extra time to finish AMQP protocol startup
-                time.sleep(2)
-                return True
-        except (socket.timeout, ConnectionRefusedError):
+            connection = pika.BlockingConnection(parameters)
+            connection.close()
+            print(" Connected and ready!")
+            return True
+        except Exception:
             pass
         print(".", end="", flush=True)
         time.sleep(2)
