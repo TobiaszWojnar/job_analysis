@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTracker - Dashboard Demo</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ApexCharts CDN for beautiful interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        green: {
+                            DEFAULT: '#44a463',
+                            50: '#f1faf4',
+                            100: '#e1f5e8',
+                            200: '#bde8cc',
+                            300: '#8ad1a1',
+                            400: '#63ba7f',
+                            500: '#44a463',
+                            600: '#35834d',
+                            700: '#27623a',
+                            800: '#1c4428',
+                            900: '#102817',
+                            950: '#08140c'
+                        },
+                        dark: {
+                            950: '#090d16',
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #44a463;
+            border-radius: 3px;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-green {
+            box-shadow: 0 0 25px -5px rgba(68, 164, 99, 0.2);
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <div class="flex min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-64 border-r border-slate-800/60 bg-slate-950/70 p-6 flex flex-col justify-between hidden md:flex">
+            <div>
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3 mb-10 px-2">
+                    <div class="relative flex h-8 w-8 items-center justify-center rounded-lg bg-green-600/10 border border-green-600/30 text-green-500">
+                        <i data-lucide="activity" class="w-5 h-5"></i>
+                        <span class="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-600 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-600"></span>
+                        </span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold tracking-wide text-slate-100">JobTracker</h1>
+                        <p class="text-xs text-green-500/70 font-semibold tracking-wider">PIPELINE ANALYTICS</p>
+                    </div>
+                </div>
+
+                <!-- Navigation List -->
+                <nav class="space-y-1">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-600/10 border border-green-600/20 text-green-500 font-medium transition duration-200">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-green-500 hover:bg-slate-900/50 border border-transparent hover:border-slate-800/50 transition duration-200">
+                        <i data-lucide="trending-up" class="w-5 h-5"></i>
+                        <span>Salary Analytics</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-green-500 hover:bg-slate-900/50 border border-transparent hover:border-slate-800/50 transition duration-200">
+                        <i data-lucide="pie-chart" class="w-5 h-5"></i>
+                        <span>Tech Insights</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-green-500 hover:bg-slate-900/50 border border-transparent hover:border-slate-800/50 transition duration-200">
+                        <i data-lucide="briefcase" class="w-5 h-5"></i>
+                        <span>Job Board</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Footer Section -->
+            <div class="glass-card p-4 rounded-xl border border-slate-800/50">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="h-2 w-2 rounded-full bg-green-600"></span>
+                    <span class="text-xs text-slate-400 font-semibold">Services Active</span>
+                </div>
+                <div class="text-xs text-slate-500 space-y-1">
+                    <p>PostgreSQL: <span class="text-green-500">Local</span></p>
+                    <p>RabbitMQ: <span class="text-green-500">Docker</span></p>
+                    <p>Ollama: <span class="text-green-500">gemma3</span></p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 p-6 md:p-10 flex flex-col justify-between min-h-screen">
+            
+            <!-- HEADER -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-100">Analytics Overview</h2>
+                    <p class="text-slate-400 text-sm mt-1">Real-time indicators compiled from your active job scraping pipeline.</p>
+                </div>
+                
+                <!-- Quick Controls -->
+                <div class="flex items-center gap-3 self-start md:self-auto">
+                    <select class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-green-600 transition">
+                        <option>All Categories</option>
+                        <option>Backend</option>
+                        <option>Frontend</option>
+                        <option>Fullstack</option>
+                        <option>Data</option>
+                    </select>
+                    <button class="flex items-center gap-2 bg-green-600 hover:bg-green-500 active:scale-95 text-slate-950 font-semibold text-sm px-4 py-2.5 rounded-xl transition duration-150 glow-green">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span>Sync Pipeline</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- KPI SUMMARY CARDS -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Card 1 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-green-600/30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-slate-400 text-sm font-semibold tracking-wide">TOTAL JOBS SCRAPED</div>
+                        <div class="p-2 rounded-lg bg-green-600/10 border border-green-600/20 text-green-500">
+                            <i data-lucide="database" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-100 mb-2">154</div>
+                    <div class="flex items-center gap-1.5 text-xs text-green-500">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                        <span>+12% this week</span>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-green-600/30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-slate-400 text-sm font-semibold tracking-wide">AVG SALARY (PLN)</div>
+                        <div class="p-2 rounded-lg bg-green-600/10 border border-green-600/20 text-green-500">
+                            <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-100 mb-2">18,500 <span class="text-sm font-medium text-slate-400">/mo</span></div>
+                    <div class="flex items-center gap-1.5 text-xs text-green-500">
+                        <span>B2B / Net value</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-green-600/30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-slate-400 text-sm font-semibold tracking-wide">APPLICATIONS SENT</div>
+                        <div class="p-2 rounded-lg bg-green-600/10 border border-green-600/20 text-green-500">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-100 mb-2">42</div>
+                    <div class="flex items-center gap-1.5 text-xs text-green-500">
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 mt-1">
+                            <div class="bg-green-600 h-1.5 rounded-full" style="width: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:border-green-600/30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-slate-400 text-sm font-semibold tracking-wide">RESPONSE RATE</div>
+                        <div class="p-2 rounded-lg bg-green-600/10 border border-green-600/20 text-green-500">
+                            <i data-lucide="message-square-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-slate-100 mb-2">28.5%</div>
+                    <div class="flex items-center gap-1.5 text-xs text-green-500">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>12 callback invitations</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CHARTS SECTION -->
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 flex-1">
+                <!-- Salary Trends Chart (Main area) -->
+                <div class="glass-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-800/50 pb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-100">Salary ranges vs. Experience</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Average monthly salaries mapped by years of experience.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block w-3 h-3 bg-green-600 rounded-full"></span>
+                            <span class="text-xs text-slate-400">PLN Net</span>
+                        </div>
+                    </div>
+                    <div id="salary-chart" class="w-full"></div>
+                </div>
+
+                <!-- Tech Distribution (Side area) -->
+                <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+                    <div class="mb-4 border-b border-slate-800/50 pb-4">
+                        <h3 class="font-bold text-slate-100">Tech Stack Distribution</h3>
+                        <p class="text-slate-400 text-xs mt-0.5">Distribution across categorized technology domains.</p>
+                    </div>
+                    <div id="tech-chart" class="w-full flex justify-center py-4"></div>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-green-600"></span>
+                            <span>Backend (45%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-teal-400"></span>
+                            <span>Frontend (25%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                            <span>DevOps (15%)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="h-2 w-2 rounded-full bg-green-300"></span>
+                            <span>Database (15%)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DATA TABLE PREVIEW -->
+            <section class="glass-card rounded-2xl p-6">
+                <div class="flex items-center justify-between mb-6 border-b border-slate-800/50 pb-4">
+                    <div>
+                        <h3 class="font-bold text-slate-100">Recent Job Listings</h3>
+                        <p class="text-slate-400 text-xs mt-0.5">Quick lookup table of recently processed job leads.</p>
+                    </div>
+                    <a href="#" class="text-xs font-semibold text-green-500 hover:text-green-300 transition duration-150">View all board listings &rarr;</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-800/40 text-xs font-semibold uppercase tracking-wider">
+                                <th class="pb-3">Company</th>
+                                <th class="pb-3">Title</th>
+                                <th class="pb-3">Category</th>
+                                <th class="pb-3">Salary Range</th>
+                                <th class="pb-3">Status</th>
+                                <th class="pb-3 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/30">
+                            <!-- Row 1 -->
+                            <tr class="hover:bg-slate-900/30 transition">
+                                <td class="py-3.5 font-medium text-slate-100">KrakowTech</td>
+                                <td class="py-3.5 text-slate-200">Fullstack AI Developer</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-600/10 border border-green-600/20 text-green-500">Fullstack</span>
+                                </td>
+                                <td class="py-3.5 font-semibold text-green-500">18K - 24K PLN</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-sky-500/10 border border-sky-500/20 text-sky-400">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-sky-400"></span>
+                                        <span>Sent</span>
+                                    </span>
+                                </td>
+                                <td class="py-3.5 text-right">
+                                    <button class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-green-600/40 rounded-lg text-xs hover:text-green-500 transition">Update</button>
+                                </td>
+                            </tr>
+                            <!-- Row 2 -->
+                            <tr class="hover:bg-slate-900/30 transition">
+                                <td class="py-3.5 font-medium text-slate-100">LeanLab</td>
+                                <td class="py-3.5 text-slate-200">Mid Python Engineer</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-600/10 border border-green-600/20 text-green-500">Backend</span>
+                                </td>
+                                <td class="py-3.5 font-semibold text-green-500">16K - 22K PLN</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-600/10 border border-green-600/20 text-green-500">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                                        <span>Interview</span>
+                                    </span>
+                                </td>
+                                <td class="py-3.5 text-right">
+                                    <button class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-green-600/40 rounded-lg text-xs hover:text-green-500 transition">Update</button>
+                                </td>
+                            </tr>
+                            <!-- Row 3 -->
+                            <tr class="hover:bg-slate-900/30 transition">
+                                <td class="py-3.5 font-medium text-slate-100">Polcode</td>
+                                <td class="py-3.5 text-slate-200">Junior Fullstack (React/Node)</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-600/10 border border-green-600/20 text-green-500">Fullstack</span>
+                                </td>
+                                <td class="py-3.5 font-semibold text-green-500">8K - 13K PLN</td>
+                                <td class="py-3.5">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-rose-500/10 border border-rose-500/20 text-rose-400">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-rose-400"></span>
+                                        <span>Rejected</span>
+                                    </span>
+                                </td>
+                                <td class="py-3.5 text-right">
+                                    <button class="px-3 py-1.5 bg-slate-900 border border-slate-800 hover:border-green-600/40 rounded-lg text-xs hover:text-green-500 transition">Update</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- CHARTS INITIALIZATION -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // 1. Salary vs Experience Line/Area Chart Config
+        var salaryOptions = {
+            series: [{
+                name: 'Average Salary (PLN)',
+                data: [11000, 13500, 15000, 18500, 22000, 25500, 27000]
+            }],
+            chart: {
+                type: 'area',
+                height: 280,
+                toolbar: { show: false },
+                background: 'transparent',
+                foreColor: '#94a3b8'
+            },
+            colors: ['#44a463'],
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.45,
+                    opacityTo: 0.05,
+                    stops: [0, 90, 100]
+                }
+            },
+            dataLabels: { enabled: false },
+            grid: {
+                borderColor: '#1e293b',
+                strokeDashArray: 4
+            },
+            xaxis: {
+                categories: ['0-1 Yr', '1-2 Yrs', '2-3 Yrs', '3-5 Yrs', '5-7 Yrs', '7-10 Yrs', '10+ Yrs'],
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return val.toLocaleString() + ' zł';
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'dark',
+                x: { show: true },
+                y: {
+                    formatter: function (val) {
+                        return val.toLocaleString() + ' PLN Net';
+                    }
+                }
+            }
+        };
+
+        var salaryChart = new ApexCharts(document.querySelector("#salary-chart"), salaryOptions);
+        salaryChart.render();
+
+        // 2. Tech Distribution Donut Chart Config
+        var techOptions = {
+            series: [45, 25, 15, 15],
+            chart: {
+                type: 'donut',
+                height: 250,
+                background: 'transparent'
+            },
+            colors: ['#44a463', '#a3e635', '#27623a', '#bbf7d0'],
+            labels: ['Backend', 'Frontend', 'DevOps', 'Database'],
+            dataLabels: { enabled: false },
+            legend: { show: false },
+            stroke: {
+                show: true,
+                colors: ['#090d16'],
+                width: 3
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '75%',
+                        background: 'transparent',
+                        labels: {
+                            show: true,
+                            name: {
+                                show: true,
+                                fontSize: '14px',
+                                color: '#94a3b8',
+                                offsetY: -8
+                            },
+                            value: {
+                                show: true,
+                                fontSize: '24px',
+                                fontWeight: 'bold',
+                                color: '#f8fafc',
+                                offsetY: 8,
+                                formatter: function (val) {
+                                    return val + "%";
+                                }
+                            },
+                            total: {
+                                show: true,
+                                label: 'Categories',
+                                color: '#94a3b8',
+                                formatter: function (w) {
+                                    return 'Total';
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'dark'
+            }
+        };
+
+        var techChart = new ApexCharts(document.querySelector("#tech-chart"), techOptions);
+        techChart.render();
+    </script>
+</body>
+</html>
